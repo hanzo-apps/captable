@@ -18,10 +18,42 @@ import {
 import type { MemberStatusEnum } from "@/prisma/enums";
 import { type TPrismaOrTransaction, db } from "@/server/db";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
+import type { OAuthConfig } from "next-auth/providers/oauth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { cache } from "react";
 import { getUserByEmail, getUserById } from "./user";
+
+const HANZO_IAM_URL = process.env.HANZO_IAM_URL;
+const HANZO_IAM_CLIENT_ID = process.env.HANZO_IAM_CLIENT_ID;
+const HANZO_IAM_CLIENT_SECRET = process.env.HANZO_IAM_CLIENT_SECRET;
+
+function HanzoIAMProvider(): OAuthConfig<any> {
+  const issuer = HANZO_IAM_URL || "https://hanzo.id";
+  return {
+    id: "hanzo-iam",
+    name: process.env.HANZO_IAM_PROVIDER_NAME || "Hanzo",
+    type: "oauth",
+    wellKnown: `${issuer}/.well-known/openid-configuration`,
+    clientId: HANZO_IAM_CLIENT_ID || "",
+    clientSecret: HANZO_IAM_CLIENT_SECRET || "",
+    authorization: { params: { scope: "openid profile email" } },
+    idToken: false,
+    userinfo: { url: `${issuer}/oauth/userinfo` },
+    profile(profile) {
+      return {
+        id: profile.sub,
+        name:
+          profile.displayName ||
+          profile.name ||
+          profile.preferred_username,
+        email: profile.email,
+        image: profile.avatar || profile.picture,
+      };
+    },
+    allowDangerousEmailAccountLinking: true,
+  };
+}
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -151,6 +183,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   providers: [
+    ...(HANZO_IAM_CLIENT_ID ? [HanzoIAMProvider()] : []),
     CredentialsProvider({
       name: "Credentials",
       credentials: {

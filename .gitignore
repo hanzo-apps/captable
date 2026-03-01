@@ -59,3 +59,10 @@ yarn-error.log*
 # Sentry Config File
 .env.sentry-build-plugin
 notes.md
+
+
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+GROK.md
+QWEN.md

@@ -1,5 +1,5 @@
 import SignInForm from "@/components/onboarding/signin";
-import { IS_GOOGLE_AUTH_ENABLED } from "@/constants/auth";
+import { IS_GOOGLE_AUTH_ENABLED, IS_HANZO_IAM_ENABLED } from "@/constants/auth";
 import { getServerComponentAuthSession } from "@/server/auth";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -19,5 +19,5 @@ export default async function SignIn() {
     return redirect("/onboarding");
   }
 
-  return <SignInForm isGoogleAuthEnabled={IS_GOOGLE_AUTH_ENABLED} />;
+  return <SignInForm isGoogleAuthEnabled={IS_GOOGLE_AUTH_ENABLED} isHanzoIAMEnabled={IS_HANZO_IAM_ENABLED} />;
 }
