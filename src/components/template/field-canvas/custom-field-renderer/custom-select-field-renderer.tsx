@@ -6,7 +6,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { type TemplateFieldForm } from "@/providers/template-field-provider";
+import type { TemplateFieldForm } from "@/providers/template-field-provider";
 import { RiDeleteBinLine } from "@remixicon/react";
 import { nanoid } from "nanoid";
 import { useFieldArray, useFormContext } from "react-hook-form";

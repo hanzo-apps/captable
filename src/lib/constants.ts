@@ -1,13 +1,13 @@
 export const constants = {
-  title: "Captable, Inc.",
-  url: "https://captable.inc",
+  title: "Hanzo Captable",
+  url: "https://captable.hanzo.ai",
   description:
-    "Captable, Inc. is the Open Source alternative to Carta and Pulley.",
+    "Hanzo Captable is the Open Source alternative to Carta and Pulley.",
   twitter: {
     url: "https://twitter.com/captableinc",
   },
   github: {
-    url: "https://github.com/captableinc/captable",
+    url: "https://github.com/hanzoai/captable",
   },
   discord: {
     url: "https://discord.gg/xs8Qu4yrTT",

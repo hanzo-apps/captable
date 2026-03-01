@@ -13,8 +13,8 @@ export function AuthFormHeader({ page }: LoginFormHeaderProps) {
 
       <h1 className="mb-2 text-2xl font-semibold tracking-tight">
         {page === "signup"
-          ? "Signup to Captable, Inc."
-          : "Login to Captable, Inc."}
+          ? "Signup to Hanzo Captable"
+          : "Login to Hanzo Captable"}
       </h1>
     </div>
   );

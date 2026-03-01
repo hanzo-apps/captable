@@ -1,5 +1,5 @@
 import { SetPasswordForm } from "@/components/onboarding/set-password";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {

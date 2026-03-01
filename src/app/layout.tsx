@@ -15,11 +15,11 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Captable, Inc.",
-    default: "Captable, Inc.",
+    template: "%s | Hanzo Captable",
+    default: "Hanzo Captable",
   },
   description:
-    "Captable, Inc. is an open source cap table management tool that does not sell your data.",
+    "Hanzo Captable is an open source cap table management tool that does not sell your data.",
   icons: [{ rel: "icon", url: logo.src }],
   metadataBase: new URL(constants.url),
 };

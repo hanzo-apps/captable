@@ -18,7 +18,7 @@ import {
 
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { type RouterOutputs } from "@/trpc/shared";
+import type { RouterOutputs } from "@/trpc/shared";
 
 import { dayjsExt } from "@/common/dayjs";
 import { Badge } from "@/components/ui/badge";

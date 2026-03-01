@@ -55,7 +55,7 @@ const OptionsPage = async () => {
              Add approval dates, notes, grantId for the stakeholders. "
                 cta={{
                   label: "Learn more",
-                  href: "https://captable.inc/help/stakeholder-options",
+                  href: "https://captable.hanzo.ai/help/stakeholder-options",
                 }}
               />
             }

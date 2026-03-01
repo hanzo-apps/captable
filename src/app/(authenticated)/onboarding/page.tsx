@@ -20,7 +20,7 @@ const OnboardingPage = async () => {
       <div className="border-rounded w-full max-w-2xl border bg-white p-10 shadow">
         <div className="mb-5">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Welcome to Captable, Inc.
+            Welcome to Hanzo Captable
           </h1>
           <p className="text-sm text-muted-foreground">
             You are almost there. Please complete the form below to continue

@@ -1,6 +1,6 @@
 import { CustomTextFieldRenderer } from "./custom-text-field-renderer";
 
-import { type TemplateFieldForm } from "@/providers/template-field-provider";
+import type { TemplateFieldForm } from "@/providers/template-field-provider";
 import { useFormContext, useWatch } from "react-hook-form";
 import { CustomSelectFieldRenderer } from "./custom-select-field-renderer";
 

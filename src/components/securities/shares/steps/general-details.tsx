@@ -152,7 +152,7 @@ export const GeneralDetails = ({ shareClasses = [] }: GeneralDetailsProps) => {
                                   cta={{
                                     label: "Learn more",
                                     // TODO - this link should be updated to the correct URL
-                                    href: "https://captable.inc/help",
+                                    href: "https://captable.hanzo.ai/help",
                                   }}
                                 />
                               ),

@@ -35,7 +35,7 @@ export default function StakeholderDropdown() {
               Categorize, assign roles, and maintain contact info for investors, partners, and clients."
                       cta={{
                         label: "Learn more",
-                        href: "https://captable.inc/help",
+                        href: "https://captable.hanzo.ai/help",
                       }}
                     />
                   ),
@@ -63,7 +63,7 @@ export default function StakeholderDropdown() {
               Categorize, assign roles, and maintain contact info for investors, partners, and clients."
                       cta={{
                         label: "Learn more",
-                        href: "https://captable.inc/help",
+                        href: "https://captable.hanzo.ai/help",
                       }}
                     />
                   ),

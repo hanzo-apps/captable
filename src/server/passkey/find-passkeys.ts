@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 export interface FindPasskeysOptions {
   userId: string;

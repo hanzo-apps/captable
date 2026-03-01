@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { RiMenuLine } from "@remixicon/react";
 import { SideBar } from "../sidebar";
 
-import { type TGetCompanyList } from "@/server/company";
+import type { TGetCompanyList } from "@/server/company";
 
 interface SideBarProps {
   publicId: string;

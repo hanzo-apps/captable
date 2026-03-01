@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { type TemplateFieldForm } from "@/providers/template-field-provider";
+import type { TemplateFieldForm } from "@/providers/template-field-provider";
 import { useFormContext } from "react-hook-form";
 
 interface CustomTextFieldRendererProps {

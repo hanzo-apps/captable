@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Login",
-  description: "Login to Captable, Inc.",
+  description: "Login to Hanzo Captable",
 };
 
 export default async function SignIn() {
@@ -19,5 +19,10 @@ export default async function SignIn() {
     return redirect("/onboarding");
   }
 
-  return <SignInForm isGoogleAuthEnabled={IS_GOOGLE_AUTH_ENABLED} isHanzoIAMEnabled={IS_HANZO_IAM_ENABLED} />;
+  return (
+    <SignInForm
+      isGoogleAuthEnabled={IS_GOOGLE_AUTH_ENABLED}
+      isHanzoIAMEnabled={IS_HANZO_IAM_ENABLED}
+    />
+  );
 }

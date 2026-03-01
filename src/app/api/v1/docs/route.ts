@@ -5,8 +5,8 @@ const config = {
     url: "/api/v1/schema",
   },
   metaData: {
-    title: "Captable API Docs",
-    description: "Captable API Docs",
+    title: "Hanzo Captable API Docs",
+    description: "Hanzo Captable API Docs",
   },
 };
 

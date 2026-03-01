@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign Up",
-  description: "Sign Up to Captable, Inc.",
+  description: "Sign Up to Hanzo Captable",
 };
 
 export default async function SignIn() {

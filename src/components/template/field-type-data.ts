@@ -1,4 +1,4 @@
-import { type FieldTypes } from "@/prisma/enums";
+import type { FieldTypes } from "@/prisma/enums";
 import {
   RiCalendar2Line,
   RiListCheck3,

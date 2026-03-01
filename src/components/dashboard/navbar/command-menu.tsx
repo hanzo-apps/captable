@@ -55,7 +55,7 @@ const Pages: CommandOption[] = [
           Categorize, assign roles, and maintain contact info for investors, partners, and clients."
             cta={{
               label: "Learn more",
-              href: "https://captable.inc/help",
+              href: "https://captable.hanzo.ai/help",
             }}
           />
         ),
@@ -100,7 +100,7 @@ const Pages: CommandOption[] = [
             cta={{
               label: "Learn more",
               // TODO - this link should be updated to the correct URL
-              href: "https://captable.inc/help",
+              href: "https://captable.hanzo.ai/help",
             }}
           />
         ),
@@ -123,7 +123,7 @@ const Pages: CommandOption[] = [
             cta={{
               label: "Learn more",
               // TODO - this link should be updated to the correct URL
-              href: "https://captable.inc/help",
+              href: "https://captable.hanzo.ai/help",
             }}
           />
         ),

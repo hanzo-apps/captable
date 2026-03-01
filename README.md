@@ -1,18 +1,18 @@
-<a href="https://captable.inc" alt="Captable, Inc.">
-  <img alt="Captable, Inc. cover image" src="https://captable.inc/og.png">
+<a href="https://captable.hanzo.ai" alt="Hanzo Captable">
+  <img alt="Hanzo Captable cover image" src="https://captable.hanzo.ai/og.png">
 </a>
 
-<h1 align="center">Captable, Inc.</h1>
+<h1 align="center">Hanzo Captable</h1>
 <p align="center">
   #1 Open-source Cap table management platform, an alternative to Carta, Pulley, Angelist and others.
 </p>
 <p align="center">
-  <a href="https://captable.inc"><strong>Learn more »</strong></a>
+  <a href="https://captable.hanzo.ai"><strong>Learn more »</strong></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/captableinc/captable/stargazers">
-    <img src="https://img.shields.io/github/stars/captableinc/captable" alt="Github" />
+  <a href="https://github.com/hanzoai/captable/stargazers">
+    <img src="https://img.shields.io/github/stars/hanzoai/captable" alt="Github" />
   </a>
   
   <a href="https://twitter.com/captableinc">
@@ -23,16 +23,16 @@
     <img src="https://img.shields.io/badge/Discord-Join%20us%20on%20Discord-purple" alt="Join us on Discord" />
   </a>
 
-  <a href="https://github.com/captableinc/captable/actions/workflows/release.yml">
-    <img src="https://github.com/captableinc/captable/actions/workflows/release.yml/badge.svg?branch=main&title=CI" alt="CI" />
+  <a href="https://github.com/hanzoai/captable/actions/workflows/release.yml">
+    <img src="https://github.com/hanzoai/captable/actions/workflows/release.yml/badge.svg?branch=main&title=CI" alt="CI" />
   </a>
 
-  <a href="https://github.com/captableinc/captable/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/captableinc/captable?label=license&logo=github&color=f80&logoColor=fff" alt="License" />
+  <a href="https://github.com/hanzoai/captable/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/hanzoai/captable?label=license&logo=github&color=f80&logoColor=fff" alt="License" />
   </a>
 
-  <a href="https://hub.docker.com/r/captable/captable">
-    <img src="https://img.shields.io/badge/Docker%20Hub-captable/captable-blue" alt="Docker image" />
+  <a href="https://hub.docker.com/r/hanzoai/captable">
+    <img src="https://img.shields.io/badge/Docker%20Hub-hanzoai/captable-blue" alt="Docker image" />
   </a>
 </p>
 
@@ -41,31 +41,31 @@
 - <a href="#features">Features</a>
 - <a href="#community">Community</a>
 - <a href="#contributing">Contibuting</a>
-- <a href="https://github.com/captableinc/captable/blob/main/SELF-HOSTING.md" target="_blank">Self hosting</a>
+- <a href="https://github.com/hanzoai/captable/blob/main/SELF-HOSTING.md" target="_blank">Self hosting</a>
 
 <h2 id="features">✨ Key features</h2>
 
 > [!IMPORTANT]  
-> We envision a world where cap table management is accessible, secure, and empowering for all. Captable, Inc. aims to democratize the handling of cap tables, securities, and stakeholder interactions. Through cutting-edge technology and a commitment to openness, we strive to be the catalyst for positive change in financial ecosystems.
+> We envision a world where cap table management is accessible, secure, and empowering for all. Hanzo Captable aims to democratize the handling of cap tables, securities, and stakeholder interactions. Through cutting-edge technology and a commitment to openness, we strive to be the catalyst for positive change in financial ecosystems.
 
-👷 **Incorporation** (wip) - Captable, Inc. helps you incorporate your company in minutes, with all the necessary legal documents and filings taken care of.
+👷 **Incorporation** (wip) - Hanzo Captable helps you incorporate your company in minutes, with all the necessary legal documents and filings taken care of.
 
-👷 **Cap table management** (wip) - Captable, Inc. helps you keep track of your company’s ownership structure, including who owns what percentage of the company, how much stock/options has been issued, and more.
+👷 **Cap table management** (wip) - Hanzo Captable helps you keep track of your company’s ownership structure, including who owns what percentage of the company, how much stock/options has been issued, and more.
 
-✅ **Fundraise** - Captable, Inc. can help you raise capital, whether its signing standard or custom SAFE or creating and managing fundraising rounds, tracking investor commitments, and more.
+✅ **Fundraise** - Hanzo Captable can help you raise capital, whether its signing standard or custom SAFE or creating and managing fundraising rounds, tracking investor commitments, and more.
 
 ✅ **Investor updates** - Delight your investors and team members by sending them regular updates on your company’s progress.
 
 ✅ **eSign Documents** - Sign SAFE, NDA, contracts, offere letters or any type of documents with Captable Sign.
 
-✅ **Data rooms** - Captable, Inc. provides a secure virtual data room where you can store important documents and share them with investors, employees, and other stakeholders.
+✅ **Data rooms** - Hanzo Captable provides a secure virtual data room where you can store important documents and share them with investors, employees, and other stakeholders.
 
 <h2 id="community">🤝 Community</h2>
 We have a community of developers, designers, and entrepreneurs who are passionate about building the future of finance. Join us on Discord to connect with like-minded individuals, share your ideas, and collaborate on projects.
 
 - [Join us on Discord](https://discord.gg/rCpqnD6G6p)
 - [Follow us on Twitter](https://twitter.com/captableinc)
-- [Meet the Founder](https://captable.inc/schedule)
+- [Meet the Founder](https://captable.hanzo.ai/schedule)
 
 <h2 id="contributing">🫡 Contributing</h2>
 
@@ -83,10 +83,10 @@ We have a community of developers, designers, and entrepreneurs who are passiona
 ---
 
 <h3 id="start">Getting started</h3>
-When contributing to <strong>Captable, Inc.</strong>, whether on GitHub or in other community spaces:
+When contributing to <strong>Hanzo Captable</strong>, whether on GitHub or in other community spaces:
 
 - Be respectful, civil, and open-minded.
-- Before opening a new pull request, try searching through the [issue tracker](https://github.com/captableinc/captable/issues) for known issues or fixes.
+- Before opening a new pull request, try searching through the [issue tracker](https://github.com/hanzoai/captable/issues) for known issues or fixes.
 
 <h3 id="setup">Setup development environment</h3>
 
@@ -98,14 +98,14 @@ When contributing to <strong>Captable, Inc.</strong>, whether on GitHub or in ot
 
 - Click the button below to open this project in Gitpod.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/captableinc/captable)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/hanzoai/captable)
 
 ---
 
 <h4 id="with-docker">Development environment with Docker</h4>
 
 - <a href="https://docs.docker.com/get-docker/" target="_blank">Install Docker</a> & <a href="https://docs.docker.com/compose/install/" target="_blank">Docker Compose</a>
-- <a href="https://github.com/captableinc/captable/fork" target="_blank">Fork</a> & clone the forked repository
+- <a href="https://github.com/hanzoai/captable/fork" target="_blank">Fork</a> & clone the forked repository
 - <a href="https://pnpm.io/installation" target="_blank">Install node and pnpm</a>. (optional)
 - Copy `.env.example` to `.env`
 
@@ -159,7 +159,7 @@ When contributing to <strong>Captable, Inc.</strong>, whether on GitHub or in ot
 
 > This has been tested on Mac OS and works really well. If you are using Linux/Windows/WSL, you might need to install some additional dependencies.
 
-- [Fork the repository](https://github.com/captableinc/captable/fork)
+- [Fork the repository](https://github.com/hanzoai/captable/fork)
 
 - Clone the repository
 
@@ -267,9 +267,9 @@ Thanks for your contributions. Much ❤️
 ---
 
 <h2 id="contributors">💌 Contributors</h2>
-<a href="https://github.com/captableinc/captable/graphs/contributors">
+<a href="https://github.com/hanzoai/captable/graphs/contributors">
   <p>
-    <img src="https://contrib.rocks/image?repo=captableinc/captable" alt="A table of avatars from the project's contributors" />
+    <img src="https://contrib.rocks/image?repo=hanzoai/captable" alt="A table of avatars from the project's contributors" />
   </p>
 </a>
 

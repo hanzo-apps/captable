@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/popover";
 import { COLORS } from "@/constants/esign";
 import { cn } from "@/lib/utils";
-import { type ComponentProps, type ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 interface useMeasurementProps {
   currentViewportHeight: number;

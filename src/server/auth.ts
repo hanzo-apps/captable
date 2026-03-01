@@ -18,9 +18,9 @@ import {
 import type { MemberStatusEnum } from "@/prisma/enums";
 import { type TPrismaOrTransaction, db } from "@/server/db";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
-import type { OAuthConfig } from "next-auth/providers/oauth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import type { OAuthConfig } from "next-auth/providers/oauth";
 import { cache } from "react";
 import { getUserByEmail, getUserById } from "./user";
 
@@ -43,10 +43,7 @@ function HanzoIAMProvider(): OAuthConfig<any> {
     profile(profile) {
       return {
         id: profile.sub,
-        name:
-          profile.displayName ||
-          profile.name ||
-          profile.preferred_username,
+        name: profile.displayName || profile.name || profile.preferred_username,
         email: profile.email,
         image: profile.avatar || profile.picture,
       };

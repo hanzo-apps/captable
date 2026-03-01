@@ -55,7 +55,7 @@ export function VerifyMemberForm({ memberId, token }: VerifyMemberFormProps) {
       <div className="flex flex-col gap-y-4">
         <div className="flex flex-col gap-y-2 text-center">
           <h1 className="text-3xl font-semibold">
-            Welcome to our Captable, Inc.! 👋
+            Welcome to our Hanzo Captable! 👋
           </h1>
           <p className="text-muted-foreground">
             Enter your information to complete onboarding

@@ -1,5 +1,5 @@
 import CheckEmailComponent from "@/components/onboarding/check-email";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Check Email",
 };

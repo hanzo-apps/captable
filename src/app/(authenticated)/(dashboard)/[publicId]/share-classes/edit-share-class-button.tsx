@@ -29,7 +29,7 @@ export const EditShareClassButton = ({
               message="A share class on a cap table represents a distinct category of shares with specific rights and characteristics, such as voting preferences or priorities. Eg. Common and Preferred shares, Class A, B, etc, ESOs and RSUs, etc."
               cta={{
                 label: "Learn more",
-                href: "https://captable.inc/help",
+                href: "https://captable.hanzo.ai/help",
               }}
             />
           ),

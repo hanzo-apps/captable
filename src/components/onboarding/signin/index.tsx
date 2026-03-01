@@ -38,7 +38,10 @@ interface LoginFormProps {
   isHanzoIAMEnabled?: boolean;
 }
 
-const SignInForm = ({ isGoogleAuthEnabled, isHanzoIAMEnabled }: LoginFormProps) => {
+const SignInForm = ({
+  isGoogleAuthEnabled,
+  isHanzoIAMEnabled,
+}: LoginFormProps) => {
   const router = useRouter();
   const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(false);
 
@@ -125,7 +128,11 @@ const SignInForm = ({ isGoogleAuthEnabled, isHanzoIAMEnabled }: LoginFormProps) 
               onClick={signInWithHanzo}
               className="bg-red-500 hover:bg-red-600 text-white"
             >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                className="mr-2 h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
               Sign in with <span className="font-bold">Hanzo</span>

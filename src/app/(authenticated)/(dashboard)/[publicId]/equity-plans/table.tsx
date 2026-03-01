@@ -9,8 +9,8 @@ import {
 
 import Tldr from "@/components/common/tldr";
 import { Card } from "@/components/ui/card";
-import { type EquityPlanMutationType } from "@/trpc/routers/equity-plan/schema";
-import { type ShareClassMutationType } from "@/trpc/routers/share-class/schema";
+import type { EquityPlanMutationType } from "@/trpc/routers/equity-plan/schema";
+import type { ShareClassMutationType } from "@/trpc/routers/share-class/schema";
 import { RiEqualizer2Line } from "@remixicon/react";
 import EquityPlanModal from "./modal";
 const formatter = new Intl.NumberFormat("en-US");
@@ -85,7 +85,7 @@ const EquityPlanTable = ({
                       cta={{
                         label: "Learn more",
                         // TODO - this link should be updated to the correct URL
-                        href: "https://captable.inc/help",
+                        href: "https://captable.hanzo.ai/help",
                       }}
                     />
                   }

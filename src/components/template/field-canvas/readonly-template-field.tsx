@@ -5,7 +5,7 @@ import {
   type ReadOnlyTemplateFieldContainerProps,
 } from "./template-field-container";
 
-import { type TemplateSigningFieldForm } from "@/providers/template-signing-field-provider";
+import type { TemplateSigningFieldForm } from "@/providers/template-signing-field-provider";
 
 type ReadOnlyTemplateFieldProps = Omit<
   ReadOnlyTemplateFieldContainerProps,

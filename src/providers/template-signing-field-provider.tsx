@@ -2,8 +2,8 @@
 
 import { Form } from "@/components/ui/form";
 import { COLORS } from "@/constants/esign";
-import { type RouterOutputs } from "@/trpc/shared";
-import { type ReactNode } from "react";
+import type { RouterOutputs } from "@/trpc/shared";
+import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 
 type Field = RouterOutputs["template"]["getSigningFields"]["fields"][number];

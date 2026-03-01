@@ -36,12 +36,12 @@ export const SharePageLayout = ({
         <p>
           Powered by{" "}
           <Link
-            href={`https://captable.inc?utm_source=${company.name}&utm_medium=${medium}&utm_campaign=powered_by`}
+            href={`https://captable.hanzo.ai?utm_source=${company.name}&utm_medium=${medium}&utm_campaign=powered_by`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold text-teal-500 hover:underline"
           >
-            Captable, Inc.
+            Hanzo Captable
           </Link>
         </p>
       </div>
