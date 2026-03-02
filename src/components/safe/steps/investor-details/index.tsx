@@ -1,8 +1,10 @@
-import { api } from "@/trpc/server";
+"use client";
+
+import { api } from "@/trpc/react";
 import { InvestorDetailsForm } from "./form";
 export { type TFormSchema } from "./form";
 
-export async function InvestorDetails() {
-  const stakeholders = await api.stakeholder.getStakeholders.query();
-  return <InvestorDetailsForm stakeholders={stakeholders} />;
+export function InvestorDetails() {
+  const { data: stakeholders } = api.stakeholder.getStakeholders.useQuery();
+  return <InvestorDetailsForm stakeholders={stakeholders ?? []} />;
 }
