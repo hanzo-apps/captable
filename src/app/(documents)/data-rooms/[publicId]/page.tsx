@@ -1,5 +1,3 @@
-"use server";
-
 import DataRoomFileExplorer from "@/components/documents/data-room/explorer";
 import { SharePageLayout } from "@/components/share/page-layout";
 import { type JWTVerifyResult, decode } from "@/lib/jwt";
@@ -18,11 +16,15 @@ const DataRoomPage = async ({
 
   try {
     decodedToken = await decode(token);
-  } catch (error) {
+  } catch (_error) {
     return notFound();
   }
 
-  const { companyId, dataRoomId, recipientId } = decodedToken?.payload;
+  if (!decodedToken) {
+    return notFound();
+  }
+
+  const { companyId, dataRoomId, recipientId } = decodedToken.payload;
   if (!companyId || !recipientId || !dataRoomId) {
     return notFound();
   }

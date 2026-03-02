@@ -1,17 +1,11 @@
-"use server";
 import { db } from "@/server/db";
-import dynamic from "next/dynamic";
+import { EditorWrapper } from "./editor-wrapper";
 
-const Editor = dynamic(
-  () => import("../../../../../../components/update/editor"),
-  { ssr: false },
-);
-
-const getUpdate = async (publicId: string) => {
+async function getUpdate(publicId: string) {
   return await db.update.findFirstOrThrow({
     where: { publicId },
   });
-};
+}
 
 const UpdatePage = async ({
   params: { publicId, updatePublicId },
@@ -19,11 +13,13 @@ const UpdatePage = async ({
   params: { publicId: string; updatePublicId: string };
 }) => {
   if (updatePublicId === "new") {
-    return <Editor companyPublicId={publicId} mode="new" />;
+    return <EditorWrapper companyPublicId={publicId} mode="new" />;
   }
   const update = await getUpdate(updatePublicId);
 
-  return <Editor companyPublicId={publicId} update={update} mode="edit" />;
+  return (
+    <EditorWrapper companyPublicId={publicId} update={update} mode="edit" />
+  );
 };
 
 export default UpdatePage;

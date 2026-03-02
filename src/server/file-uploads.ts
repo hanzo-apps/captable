@@ -101,8 +101,8 @@ export const getPresignedGetUrl = async (key: string) => {
   return { key, url };
 };
 
-export const deleteBucketFile = (key: string) => {
-  return S3.send(
+export const deleteBucketFile = async (key: string) => {
+  return await S3.send(
     new DeleteObjectCommand({
       Bucket: process.env.UPLOAD_BUCKET_PRIVATE,
       Key: key,

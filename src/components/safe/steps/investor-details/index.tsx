@@ -1,5 +1,3 @@
-"use server";
-
 import { api } from "@/trpc/server";
 import { InvestorDetailsForm } from "./form";
 export { type TFormSchema } from "./form";
