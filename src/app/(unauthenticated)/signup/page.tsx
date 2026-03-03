@@ -1,5 +1,4 @@
 import SignUpForm from "@/components/onboarding/signup";
-import { IS_GOOGLE_AUTH_ENABLED } from "@/constants/auth";
 import { getServerComponentAuthSession } from "@/server/auth";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -19,5 +18,5 @@ export default async function SignIn() {
     return redirect("/onboarding");
   }
 
-  return <SignUpForm isGoogleAuthEnabled={IS_GOOGLE_AUTH_ENABLED} />;
+  return <SignUpForm />;
 }
