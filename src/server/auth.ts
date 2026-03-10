@@ -35,6 +35,7 @@ function HanzoIAMProvider(): OAuthConfig<any> {
         name: profile.displayName || profile.name || profile.preferred_username,
         email: profile.email,
         image: profile.avatar || profile.picture,
+        organization: profile.owner || profile.organization || profile.org,
       };
     },
     allowDangerousEmailAccountLinking: true,
@@ -52,6 +53,7 @@ declare module "next-auth" {
       memberId: string;
       companyPublicId: string;
       status: MemberStatusEnum | "";
+      organization?: string;
     } & DefaultSession["user"];
   }
 }
@@ -64,6 +66,7 @@ declare module "next-auth/jwt" {
     isOnboarded: boolean;
     companyPublicId: string;
     status: MemberStatusEnum | "";
+    organization?: string;
   }
 }
 
@@ -86,6 +89,7 @@ export const authOptions: NextAuthOptions = {
       session.user.memberId = token.memberId;
       session.user.companyPublicId = token.companyPublicId;
       session.user.status = token.status;
+      session.user.organization = token.organization;
       session.user.name = token.name;
       session.user.email = token.email;
       session.user.image = token.picture ?? "";
@@ -96,7 +100,12 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async jwt({ token, trigger }) {
+    async jwt({ token, user, trigger }) {
+      // Persist IAM organization claim from initial sign-in
+      const orgUser = user as { organization?: string } | undefined;
+      if (orgUser?.organization) {
+        token.organization = orgUser.organization;
+      }
       if (trigger) {
         const member = await db.member.findFirst({
           where: {
