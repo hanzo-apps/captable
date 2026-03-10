@@ -83,7 +83,7 @@ const UpdatesEditor = ({
       },
       content: [
         {
-          text: "Here's a quick update on what's been happening at Hanzo Captable this month. We're excited to share that we've hit a major milestone! Our team has been hard at work and we're proud to announce that we've successfully launched our new product feature.",
+          text: "Here's a quick update on what's been happening at your company this month. We're excited to share that we've hit a major milestone! Our team has been hard at work and we're proud to announce that we've successfully launched our new product feature.",
           type: "text",
           styles: {},
         },
@@ -156,7 +156,7 @@ const UpdatesEditor = ({
       },
       content: [
         {
-          text: "The Hanzo Captable Team",
+          text: "The your company Team",
           type: "text",
           styles: {},
         },

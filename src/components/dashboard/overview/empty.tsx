@@ -12,7 +12,7 @@ const EmptyOverview = ({ firstName, publicCompanyId }: EmptyOverviewProps) => {
   return (
     <EmptyState
       icon={<RiPieChartFill />}
-      title={`Welcome to Hanzo Captable ${firstName && `, ${firstName}`} 👋`}
+      title={`Welcome to ${process.env.NEXT_PUBLIC_APP_NAME || "Hanzo Captable"} ${firstName && `, ${firstName}`} 👋`}
       subtitle={
         <span className="text-muted-foreground">
           We will get you setup with your Captable in no time.

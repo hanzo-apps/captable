@@ -1,4 +1,5 @@
 import { CaptableLogo } from "@/components/common/logo";
+import { APP_NAME } from "@/lib/branding";
 
 interface LoginFormHeaderProps {
   page?: string;
@@ -13,8 +14,8 @@ export function AuthFormHeader({ page }: LoginFormHeaderProps) {
 
       <h1 className="mb-2 text-2xl font-semibold tracking-tight">
         {page === "signup"
-          ? "Signup to Hanzo Captable"
-          : "Login to Hanzo Captable"}
+          ? `Signup to ${APP_NAME}`
+          : `Login to ${APP_NAME}`}
       </h1>
     </div>
   );

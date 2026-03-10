@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/branding";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
@@ -36,12 +37,12 @@ export const SharePageLayout = ({
         <p>
           Powered by{" "}
           <Link
-            href={`https://captable.hanzo.ai?utm_source=${company.name}&utm_medium=${medium}&utm_campaign=powered_by`}
+            href={`${process.env.NEXT_PUBLIC_APP_URL || "https://captable.hanzo.ai"}?utm_source=${company.name}&utm_medium=${medium}&utm_campaign=powered_by`}
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold text-teal-500 hover:underline"
           >
-            Hanzo Captable
+            {APP_NAME}
           </Link>
         </p>
       </div>

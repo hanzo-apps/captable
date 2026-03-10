@@ -12,20 +12,20 @@ import { type TPrismaOrTransaction, db } from "@/server/db";
 import type { OAuthConfig } from "next-auth/providers/oauth";
 import { cache } from "react";
 
-const HANZO_IAM_URL = process.env.HANZO_IAM_URL;
-const HANZO_IAM_CLIENT_ID = process.env.HANZO_IAM_CLIENT_ID;
-const HANZO_IAM_CLIENT_SECRET = process.env.HANZO_IAM_CLIENT_SECRET;
+const IAM_URL = process.env.IAM_URL;
+const IAM_CLIENT_ID = process.env.IAM_CLIENT_ID;
+const IAM_CLIENT_SECRET = process.env.IAM_CLIENT_SECRET;
 
 // biome-ignore lint/suspicious/noExplicitAny: IAM profile shape varies
 function HanzoIAMProvider(): OAuthConfig<any> {
-  const issuer = HANZO_IAM_URL || "https://hanzo.id";
+  const issuer = IAM_URL || "https://hanzo.id";
   return {
     id: "hanzo-iam",
-    name: process.env.HANZO_IAM_PROVIDER_NAME || "Hanzo",
+    name: process.env.IAM_PROVIDER_NAME || "Hanzo",
     type: "oauth",
     wellKnown: `${issuer}/.well-known/openid-configuration`,
-    clientId: HANZO_IAM_CLIENT_ID || "",
-    clientSecret: HANZO_IAM_CLIENT_SECRET || "",
+    clientId: IAM_CLIENT_ID || "",
+    clientSecret: IAM_CLIENT_SECRET || "",
     authorization: { params: { scope: "openid profile email" } },
     idToken: false,
     userinfo: { url: `${issuer}/oauth/userinfo` },

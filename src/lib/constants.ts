@@ -1,8 +1,9 @@
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/branding";
+
 export const constants = {
-  title: "Hanzo Captable",
-  url: "https://captable.hanzo.ai",
-  description:
-    "Hanzo Captable is the Open Source alternative to Carta and Pulley.",
+  title: APP_NAME,
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://captable.hanzo.ai",
+  description: APP_DESCRIPTION,
   twitter: {
     url: "https://twitter.com/captableinc",
   },

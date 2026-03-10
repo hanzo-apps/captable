@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/branding";
 import SignInForm from "@/components/onboarding/signin";
 import { getServerComponentAuthSession } from "@/server/auth";
 import type { Metadata } from "next";
@@ -5,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Login",
-  description: "Login to Hanzo Captable",
+  description: `Login to ${APP_NAME}`,
 };
 
 export default async function SignIn() {

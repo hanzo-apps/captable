@@ -34,7 +34,7 @@ export function PublicAPI() {
     openapi: "3.1.0",
     info: {
       version: "v1",
-      title: "Hanzo Captable API (v1)",
+      title: `${process.env.NEXT_PUBLIC_APP_NAME || "Hanzo Captable"} API (v1)`,
     },
     servers: [{ url: `${env.NEXTAUTH_URL}` }],
   }));

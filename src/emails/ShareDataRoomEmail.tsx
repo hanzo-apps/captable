@@ -84,7 +84,7 @@ export const ShareDataRoomEmail = ({
 ShareDataRoomEmail.PreviewProps = {
   senderName: "John Doe",
   recipientName: "Will Smith",
-  companyName: "Hanzo Captable",
+  companyName: "Captable",
   dataRoom: "Q1 2024 Financials",
   link: "https://captable.hanzo.ai/...",
 } as ShareDataRoomEmailProps;

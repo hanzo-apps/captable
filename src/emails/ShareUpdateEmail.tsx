@@ -85,7 +85,7 @@ export const ShareUpdateEmail = ({
 ShareUpdateEmail.PreviewProps = {
   senderName: "John Doe",
   recipientName: "Will Smith",
-  companyName: "Hanzo Captable",
+  companyName: "Captable",
   updateTitle: "Q1 2024 Financials",
   link: "https://captable.hanzo.ai/...",
 } as ShareUpdateEmailProps;

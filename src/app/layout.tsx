@@ -1,4 +1,5 @@
 import logo from "@/assets/logo.svg";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/branding";
 import { PublicEnvScript } from "@/components/public-env-script";
 import ScreenSize from "@/components/screen-size";
 import { constants } from "@/lib/constants";
@@ -15,11 +16,10 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Hanzo Captable",
-    default: "Hanzo Captable",
+    template: `%s | ${APP_NAME}`,
+    default: APP_NAME,
   },
-  description:
-    "Hanzo Captable is an open source cap table management tool that does not sell your data.",
+  description: APP_DESCRIPTION,
   icons: [{ rel: "icon", url: logo.src }],
   metadataBase: new URL(constants.url),
 };
