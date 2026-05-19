@@ -48,7 +48,7 @@ export function PublicAPI() {
     },
   );
 
-  api.get("/v1/swagger", swaggerUI({ url: "/api/v1/schema" }));
+  api.get("/v1/swagger", swaggerUI({ url: "/v1/schema" }));
   return api;
 }
 
