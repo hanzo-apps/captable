@@ -4,7 +4,7 @@ const appName = process.env.NEXT_PUBLIC_APP_NAME || "Hanzo Captable";
 
 const config = {
   spec: {
-    url: "/api/v1/schema",
+    url: "/v1/schema",
   },
   metaData: {
     title: `${appName} API Docs`,
