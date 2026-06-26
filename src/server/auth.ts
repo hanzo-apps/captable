@@ -31,7 +31,7 @@ function HanzoIAMProvider(): OAuthConfig<any> {
     clientSecret: IAM_CLIENT_SECRET || "",
     authorization: { params: { scope: "openid profile email" } },
     idToken: false,
-    userinfo: { url: `${issuer}/oauth/userinfo` },
+    userinfo: { url: `${issuer}/v1/iam/oauth/userinfo` },
     profile(profile) {
       return {
         id: profile.sub,
