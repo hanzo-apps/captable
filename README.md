@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="captable" width="880"></p>
+
 <a href="https://captable.hanzo.ai" alt="Hanzo Captable">
   <img alt="Hanzo Captable cover image" src="https://captable.hanzo.ai/og.png">
 </a>
