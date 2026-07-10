@@ -1160,6 +1160,7 @@
   }
 
   // src/routes/captable.ts
+  var DILUTIVE_OPTION_STATUS = `status NOT IN ('EXERCISED','EXPIRED','CANCELLED')`;
   function capTable(ctx) {
     const cid = ctx.companyId;
     const company = db.query(`SELECT id, name FROM company WHERE id = ?`, [cid]);
@@ -1170,14 +1171,17 @@
       "n"
     );
     const optionShares = num2(
-      db.query(`SELECT COALESCE(SUM(quantity),0) AS n FROM option WHERE company_id = ?`, [cid]),
+      db.query(
+        `SELECT COALESCE(SUM(quantity),0) AS n FROM option WHERE company_id = ? AND ${DILUTIVE_OPTION_STATUS}`,
+        [cid]
+      ),
       "n"
     );
     const fullyDiluted = outstanding + optionShares;
     const byStakeholder = db.query(
       `SELECT st.id AS stakeholderId, st.name,
             COALESCE((SELECT SUM(sh.quantity) FROM share  sh WHERE sh.stakeholder_id = st.id AND sh.company_id = st.company_id), 0) AS shares,
-            COALESCE((SELECT SUM(op.quantity) FROM option op WHERE op.stakeholder_id = st.id AND op.company_id = st.company_id), 0) AS options
+            COALESCE((SELECT SUM(op.quantity) FROM option op WHERE op.stakeholder_id = st.id AND op.company_id = st.company_id AND op.${DILUTIVE_OPTION_STATUS}), 0) AS options
        FROM stakeholder st
       WHERE st.company_id = ?
       ORDER BY shares DESC, options DESC`,

@@ -1,7 +1,7 @@
 // Cap-table computation — the read the whole pilot exists to prove round-trips
 // through Base. A real aggregation over issued equity:
 //   - outstanding  = Σ share.quantity
-//   - fullyDiluted = outstanding + Σ option.quantity (granted options)
+//   - fullyDiluted = outstanding + Σ OUTSTANDING option.quantity
 //   - per-stakeholder ownership on a fully-diluted basis
 //   - per-share-class authorized vs issued
 //   - convertibles (SAFE + note capital not yet converted) as a side section
@@ -9,6 +9,16 @@
 
 import { db } from "../host";
 import { type Ctx, notFound, okRes, type Res } from "./common";
+
+// Only OUTSTANDING options dilute the cap table. Options in a TERMINAL state are
+// excluded from the fully-diluted math and every ownership %:
+//   - EXERCISED → already converted to shares (counted in `share`); counting the
+//                 option too would DOUBLE-COUNT the same equity.
+//   - EXPIRED / CANCELLED → void; the shares will never be issued.
+// DRAFT + ACTIVE remain (granted / pending grants that still dilute). Summing ALL
+// option rows regardless of status inflated fullyDilutedShares and understated
+// every stakeholder's true ownership — a correctness bug on a cap-table surface.
+const DILUTIVE_OPTION_STATUS = `status NOT IN ('EXERCISED','EXPIRED','CANCELLED')`;
 
 export function capTable(ctx: Ctx): Res {
   const cid = ctx.companyId;
@@ -23,7 +33,10 @@ export function capTable(ctx: Ctx): Res {
     "n",
   );
   const optionShares = num(
-    db.query(`SELECT COALESCE(SUM(quantity),0) AS n FROM option WHERE company_id = ?`, [cid]),
+    db.query(
+      `SELECT COALESCE(SUM(quantity),0) AS n FROM option WHERE company_id = ? AND ${DILUTIVE_OPTION_STATUS}`,
+      [cid],
+    ),
     "n",
   );
   const fullyDiluted = outstanding + optionShares;
@@ -32,7 +45,7 @@ export function capTable(ctx: Ctx): Res {
   const byStakeholder = db.query(
     `SELECT st.id AS stakeholderId, st.name,
             COALESCE((SELECT SUM(sh.quantity) FROM share  sh WHERE sh.stakeholder_id = st.id AND sh.company_id = st.company_id), 0) AS shares,
-            COALESCE((SELECT SUM(op.quantity) FROM option op WHERE op.stakeholder_id = st.id AND op.company_id = st.company_id), 0) AS options
+            COALESCE((SELECT SUM(op.quantity) FROM option op WHERE op.stakeholder_id = st.id AND op.company_id = st.company_id AND op.${DILUTIVE_OPTION_STATUS}), 0) AS options
        FROM stakeholder st
       WHERE st.company_id = ?
       ORDER BY shares DESC, options DESC`,
