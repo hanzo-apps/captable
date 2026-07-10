@@ -5,6 +5,7 @@
     "ignore": [
       "node_modules",
       ".next",
+      "goja",
       "dist",
       "public/pdf.worker.min.js",
       "./prisma/enums.ts",
@@ -25,6 +26,7 @@
     "ignore": [
       "node_modules",
       ".next",
+      "goja",
       "dist",
       "public/pdf.worker.min.js",
       "./prisma/enums.ts",
@@ -43,6 +45,7 @@
     "ignore": [
       "node_modules",
       ".next",
+      "goja",
       "dist",
       "public/pdf.worker.min.js",
       "./prisma/enums.ts",
