@@ -10,7 +10,7 @@ jobs:
   deploy:
     name: 🚀 Deploy
     environment: staging
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     concurrency:
       group: staging
       cancel-in-progress: true

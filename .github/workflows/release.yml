@@ -7,7 +7,7 @@ on:
 jobs:
   push_to_registries:
     name: Publish docker image & deploy to production
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     concurrency:
       group: release
       cancel-in-progress: true
