@@ -11,4 +11,4 @@
 // github.com/hanzoai/plans.
 module github.com/hanzoai/captable
 
-go 1.26.4
+go 1.26.5
