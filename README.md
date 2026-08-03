@@ -181,41 +181,33 @@ When contributing to <strong>Hanzo Captable</strong>, whether on GitHub or in ot
 - Create database `captable` in postgres database
 - Update `.env` file's `DATABASE_URL` with database credentials
 - For a quick start, you can use [Supabase database](https://supabase.com/) or [Neon](https://neon.tech/) as well.
-- To simulate file storage locally, install `minio` via homebrew or any other package manager.
+- File storage is [Hanzo S3](https://github.com/hanzoai/s3), an S3-compatible object store. Start it and create its two buckets with:
 
   ```bash
-  brew install minio
+  docker compose up -d s3 s3-init
   ```
 
-  Once minio is installed run
+  `s3` serves the S3 API on `http://127.0.0.1:9000`. `s3-init` creates `captable-private-bucket` and `captable-public-bucket` (the latter public-read), then exits 0. There is no web console — use the AWS CLI against the same endpoint:
+
   ```bash
-  minio server start --console-address ":9002"
+  AWS_ENDPOINT_URL=http://127.0.0.1:9000 \
+  AWS_ACCESS_KEY_ID=captable AWS_SECRET_ACCESS_KEY=password \
+  aws s3 ls s3://captable-public-bucket
   ```
 
-  This will start minio server <br>
-  minio api will be available on `http://127.0.0.1:9000` and <br>
-  minio web gui will be available on `http://127.0.0.1:9002`.
+  The upload settings in `.env.example` already match this, so no `.env` edits are needed:
 
-  once you see these endpoint in terminal, update the following `.env`:
-  
   ```bash
-  UPLOAD_ENDPOINT="http://127.0.0.1:9000" # should match minio api server's endpoint
-  NEXT_PUBLIC_UPLOAD_DOMAIN="http://127.0.0.1:9000" # should match minio api server's endpoint
+  UPLOAD_ENDPOINT="http://127.0.0.1:9000"
+  NEXT_PUBLIC_UPLOAD_DOMAIN="http://127.0.0.1:9000"
   UPLOAD_REGION="us-east-1" # don't change it
-  UPLOAD_ACCESS_KEY_ID="minioadmin" # by default minio username is "minioadmin"
-  UPLOAD_SECRET_ACCESS_KEY="minioadmin" # by default minio password is "minioadmin"
+  UPLOAD_ACCESS_KEY_ID="captable"
+  UPLOAD_SECRET_ACCESS_KEY="password"
   UPLOAD_BUCKET_PUBLIC="captable-public-bucket"
   UPLOAD_BUCKET_PRIVATE="captable-private-bucket"
   ```
 
-  after this,
-  go to minio web gui(`http://127.0.0.1:9002`) and login: <br>
-  username: `minioadmin` <br>
-  password: `minioadmin`
-
-  and create two buckets with the name: <br> `captable-public-bucket` and `captable-private-bucket`,<br> this should match `UPLOAD_BUCKET_PUBLIC` and `UPLOAD_BUCKET_PRIVATE` env's values.
-
-  and you should be done with minio setup.
+  To point captable at a hosted bucket instead (AWS S3, R2, Backblaze), set the same seven variables to that provider's endpoint, region and keys.
 
 - Run the following command to install dependencies
 

@@ -10,7 +10,7 @@ Captable, Inc. is an open-source cap table management platform designed as an al
 - **Authentication**: NextAuth with Passkey support
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Email**: React Email with Nodemailer
-- **File Storage**: AWS S3 compatible (Minio for local dev)
+- **File Storage**: AWS S3 compatible (Hanzo S3 for local dev — `ghcr.io/hanzoai/s3`, API on :9000, no console)
 - **Payments**: Stripe integration
 - **PDF**: PDF-lib for generation, React-PDF for viewing
 - **Queue**: pg-boss for job processing
@@ -141,6 +141,18 @@ src/
 2. Direct upload to S3-compatible storage
 3. Reference stored in database
 4. Access controlled through application logic
+
+Local storage is the `s3` service in `compose.yml` (`ghcr.io/hanzoai/s3`, published
+linux/amd64 only). It takes its admin credentials from `AWS_ACCESS_KEY_ID` /
+`AWS_SECRET_ACCESS_KEY`, serves the S3 API on `:9000`, and has no web console —
+inspect it with `AWS_ENDPOINT_URL=http://127.0.0.1:9000 aws s3 ...`. The `s3-init`
+service creates the two buckets with the AWS CLI and marks the public one
+`public-read`; it is idempotent and exits 0. Two gotchas worth knowing:
+- Each bucket preallocates 7 storage volumes, so the image's default cap of 8
+  volumes cannot hold both buckets — the compose `command:` lowers the volume size
+  to 1GB and sets `-volume.max=0` (derive the count from free disk).
+- `s3api head-bucket || s3 mb` is the idempotent create; a bare `mb` on an existing
+  bucket fails with `BucketAlreadyExists`.
 
 ### E-Signing Workflow
 1. Upload PDF document

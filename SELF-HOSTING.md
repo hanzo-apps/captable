@@ -10,7 +10,7 @@ If you like to self-host Hanzo Captable, please schedule a call with us, and we 
   - Docker
   - Postgres database (RDS, Cloud SQL, Supabase, Neon etc.)
   - SMTP provider (Resend, AWS SES, Mailgun, Sendgrid etc.)
-  - S3 Compatible storage (AWS S3, R2, Minio, Backblaze etc.)
+  - S3 Compatible storage (Hanzo S3, AWS S3, R2, Backblaze etc.)
 
 - **Official Docker Images**:
   - <a href="https://hub.docker.com/r/hanzoai/captable" target="_blank">Docker hub</a>
