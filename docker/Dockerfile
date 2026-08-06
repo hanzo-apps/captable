@@ -14,7 +14,10 @@ COPY prisma ./prisma
 
 ENV HUSKY 0
 
-# Install dependencies
+# Install dependencies. The pnpm version is stated once — package.json's
+# `packageManager` field — and corepack reads it from there. Unpinned, corepack
+# takes whatever npm calls latest that day; that is how this build broke with
+# no commit to the repo.
 COPY package.json pnpm-lock.yaml* ./
 RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
