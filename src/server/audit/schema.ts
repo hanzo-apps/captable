@@ -98,8 +98,6 @@ export const AuditSchema = z.object({
         "stakeholder",
         "accessToken",
         "bucket",
-        "stripeSession",
-        "stripeBillingPortalSession",
         "dataroom",
         "role",
         "template",

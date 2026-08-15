@@ -88,11 +88,7 @@ const accountNav = [
   },
 ];
 
-interface SettingsSidebarProps {
-  isBillingEnabled: boolean;
-}
-
-export function SettingsSidebar({ isBillingEnabled }: SettingsSidebarProps) {
+export function SettingsSidebar() {
   const currentPath = usePathname();
   const { data } = useSession();
   const companyPublicId = data?.user.companyPublicId;
@@ -102,10 +98,6 @@ export function SettingsSidebar({ isBillingEnabled }: SettingsSidebarProps) {
       {companyNav.map((item) => {
         const href = `/${companyPublicId}${item.href}`;
         const isActive = currentPath === href;
-
-        if (item.name === "Billing" && !isBillingEnabled) {
-          return null;
-        }
 
         return (
           <li key={item.name} className="rounded py-1">
