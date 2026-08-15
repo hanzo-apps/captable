@@ -33,7 +33,13 @@ export default async function RootLayout({
   const nodeEnv = process.env.NODE_ENV;
 
   return (
-    <html lang="en" className={cn(satoshi.variable, robotoMono.variable)}>
+    // Dark, always. There is no theme switcher here, so the `.dark` palette was
+    // never applied and the app rendered the light `:root` one — beside every
+    // other Hanzo surface, which is black. Naming the class on <html> is also the
+    // one place it cannot disagree with itself: read it from storage in a
+    // provider instead and the server renders one palette, the client another,
+    // and the mismatch takes the whole tree down to client rendering.
+    <html lang="en" className={cn("dark", satoshi.variable, robotoMono.variable)}>
       <head>
         <PublicEnvScript />
       </head>
