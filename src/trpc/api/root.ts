@@ -3,7 +3,6 @@ import { accessTokenRouter } from "../routers/access-token/router";
 import { auditRouter } from "../routers/audit-router/router";
 import { authRouter } from "../routers/auth/router";
 import { bankAccountsRouter } from "../routers/bank-accounts/router";
-import { billingRouter } from "../routers/billing-router/router";
 import { bucketRouter } from "../routers/bucket-router/router";
 import { commonRouter } from "../routers/common/router";
 import { companyRouter } from "../routers/company-router/router";
@@ -50,7 +49,6 @@ export const appRouter = createTRPCRouter({
   common: commonRouter,
   passkey: passkeyRouter,
   security: securityRouter,
-  billing: billingRouter,
   rbac: rbacRouter,
   accessToken: accessTokenRouter,
   bankAccounts: bankAccountsRouter,

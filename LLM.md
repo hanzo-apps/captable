@@ -11,7 +11,7 @@ Captable, Inc. is an open-source cap table management platform designed as an al
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Email**: React Email with Nodemailer
 - **File Storage**: AWS S3 compatible (Minio for local dev)
-- **Payments**: Stripe integration
+- **Payments**: hosted on billing.hanzo.ai / pay.hanzo.ai — the app only links out
 - **PDF**: PDF-lib for generation, React-PDF for viewing
 - **Queue**: pg-boss for job processing
 - **Monitoring**: Sentry for error tracking
@@ -52,7 +52,7 @@ src/
 │   ├── (authenticated)/    # Protected routes (dashboard, etc.)
 │   ├── (unauthenticated)/ # Public routes (login, signup, etc.)
 │   ├── (documents)/       # Document-related pages
-│   └── api/               # API routes (auth, stripe, trpc)
+│   └── api/               # API routes (auth, trpc)
 ├── components/            # React components organized by feature
 ├── server/               # Server-side utilities and services
 ├── trpc/                 # tRPC setup and routers
@@ -92,7 +92,6 @@ src/
 - **Audit**: Activity log entries
 - **Update**: Investor updates
 - **BankAccount**: Company bank accounts
-- **Billing**: Stripe integration entities
 
 ## Key API Routes (tRPC)
 
@@ -124,7 +123,6 @@ src/
 
 ### Other
 - `audit`: Audit log access
-- `billing`: Stripe subscription management
 - `bucket`: File storage operations
 - `common`: Shared utilities
 
@@ -163,7 +161,8 @@ Key environment variables:
 - `NEXTAUTH_URL/SECRET`: Authentication config
 - `EMAIL_*`: SMTP configuration
 - `UPLOAD_*`: S3-compatible storage config
-- `STRIPE_*`: Payment processing
+- `NEXT_PUBLIC_BILLING_URL` / `NEXT_PUBLIC_PAY_URL`: override the hosted billing
+  and plan pages (defaults in `src/constants/billing.ts`)
 - `NEXT_PUBLIC_*`: Client-side variables
 
 ## Security Considerations
