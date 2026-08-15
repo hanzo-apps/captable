@@ -30,7 +30,15 @@ function HanzoIAMProvider(): OAuthConfig<any> {
     clientId: IAM_CLIENT_ID || "",
     clientSecret: IAM_CLIENT_SECRET || "",
     authorization: { params: { scope: "openid profile email" } },
-    idToken: false,
+    // hanzo.id IS an OIDC provider and returns an id_token, so the callback has
+    // to be the OIDC one. With this false, next-auth uses the plain-OAuth2 path
+    // and openid-client throws on the token response — "id_token detected in
+    // the response, you must use client.callback() instead of
+    // client.oauthCallback()" — which reaches a signing-in user as nothing more
+    // than `?error=OAuthCallback`. dataroom shipped exactly this and every
+    // sign-in failed; the handoff to hanzo.id looks perfectly healthy either
+    // way, so only completing a login tells the two apart.
+    idToken: true,
     userinfo: { url: `${issuer}/v1/iam/oauth/userinfo` },
     profile(profile) {
       return {
