@@ -43,34 +43,41 @@ body {
     --radius: 0.5rem;
   }
 
+  /* Black, and neutral all the way down.
+     Every token here carried hue 240 at 3.7–10% saturation — the stock palette's
+     blue-grey — so the whole surface read blue rather than black, and it did not
+     sit beside the console. Saturation is 0 throughout: a grey that leans is a
+     grey the eye reads as a colour, and the only colour on this surface should be
+     one we chose. The background is true black; card, popover and the raised
+     greys step up from it so depth comes from lightness alone. */
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 0 0% 4%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 6%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary-foreground: 0 0% 6%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 64%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 0 0% 14%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 0 0% 84%;
   }
 }
 
