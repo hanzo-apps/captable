@@ -12,6 +12,7 @@ import {
 import { env } from "@/env";
 import type { MemberStatusEnum } from "@/prisma/enums";
 import { type TPrismaOrTransaction, db } from "@/server/db";
+import { getToken } from "next-auth/jwt";
 import type { OAuthConfig } from "next-auth/providers/oauth";
 import { cache } from "react";
 
@@ -46,7 +47,6 @@ function HanzoIAMProvider(): OAuthConfig<any> {
         name: profile.displayName || profile.name || profile.preferred_username,
         email: profile.email,
         image: profile.avatar || profile.picture,
-        organization: profile.owner || profile.organization || profile.org,
       };
     },
     allowDangerousEmailAccountLinking: true,
@@ -78,6 +78,11 @@ declare module "next-auth/jwt" {
     companyPublicId: string;
     status: MemberStatusEnum | "";
     organization?: string;
+    // The IAM token the cap-table backend authenticates with. It lives here and
+    // only here: the JWT is an encrypted httpOnly cookie, while `session` is
+    // served to the browser verbatim at /api/auth/session.
+    hanzoToken?: string;
+    hanzoTokenExpires?: number;
   }
 }
 
@@ -111,11 +116,26 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async jwt({ token, user, trigger }) {
-      // Persist IAM organization claim from initial sign-in
-      const orgUser = user as { organization?: string } | undefined;
-      if (orgUser?.organization) {
-        token.organization = orgUser.organization;
+    async jwt({ token, account, profile, trigger }) {
+      // `account` is present on the sign-in pass only, so this is the one moment
+      // the IAM access token is on offer. The cap-table backend reads the tenant
+      // off this token's own claims, so keeping it is what makes the cap table
+      // reachable at all.
+      if (account?.access_token) {
+        token.hanzoToken = account.access_token;
+        token.hanzoTokenExpires = account.expires_at
+          ? account.expires_at * 1000
+          : undefined;
+      }
+
+      // The org claim rides the verified id_token. It is not a User column, and
+      // anything profile() returns is spread straight into prisma.user.create —
+      // an unknown key there fails the insert and every first sign-in with it.
+      const claims = profile as
+        | { owner?: string; organization?: string; org?: string }
+        | undefined;
+      if (claims) {
+        token.organization = claims.owner ?? claims.organization ?? claims.org;
       }
       if (trigger) {
         const member = await db.member.findFirst({
@@ -177,6 +197,43 @@ export const authOptions: NextAuthOptions = {
     signOut: "/login",
   },
 };
+
+/** Split a `Cookie:` header into the name→value map `getToken` reads. */
+const cookieJar = (header: string): Record<string, string> => {
+  const jar: Record<string, string> = {};
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq < 0) continue;
+    jar[part.slice(0, eq).trim()] = decodeURIComponent(
+      part.slice(eq + 1).trim(),
+    );
+  }
+  return jar;
+};
+
+/**
+ * The IAM access token this session signed in with, for calling the cap-table
+ * backend as the user. Empty when the session predates the token being kept, or
+ * when the token has outlived its own expiry — the caller then refuses the call
+ * with something a person can act on rather than passing a dead bearer upstream.
+ *
+ * Read from the cookie alone. `getToken` will otherwise accept an `Authorization`
+ * header as the session, and this app serves a public API whose callers send one.
+ */
+export async function hanzoAccessToken(headers: Headers): Promise<string> {
+  const token = await getToken({
+    req: {
+      cookies: cookieJar(headers.get("cookie") ?? ""),
+      headers: new Headers(),
+    } as never,
+    secret: env.NEXTAUTH_SECRET,
+  });
+
+  if (!token?.hanzoToken) return "";
+  if (token.hanzoTokenExpires && token.hanzoTokenExpires <= Date.now())
+    return "";
+  return token.hanzoToken;
+}
 
 export const getServerAuthSession = () => getServerSession(authOptions);
 

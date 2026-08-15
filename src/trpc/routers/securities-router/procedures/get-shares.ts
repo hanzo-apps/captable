@@ -1,71 +1,24 @@
-import { checkMembership } from "@/server/auth";
+import { documentsBySecurity } from "@/server/captable-documents";
 import { withAuth } from "@/trpc/api/trpc";
 
 export const getSharesProcedure = withAuth.query(
-  async ({ ctx: { db, session } }) => {
-    const data = await db.$transaction(async (tx) => {
-      const { companyId } = await checkMembership({ session, tx });
+  async ({ ctx: { db, captable } }) => {
+    const shares = await captable.shares.list();
+    const documents = await documentsBySecurity(
+      db,
+      "shareId",
+      shares.map((share) => share.id),
+    );
 
-      const shares = await tx.share.findMany({
-        where: {
-          companyId,
-        },
-        select: {
-          id: true,
-          certificateId: true,
-          quantity: true,
-          pricePerShare: true,
-          capitalContribution: true,
-          ipContribution: true,
-          debtCancelled: true,
-          otherContributions: true,
-          cliffYears: true,
-          vestingYears: true,
-          companyLegends: true,
-          status: true,
-
-          issueDate: true,
-          rule144Date: true,
-          vestingStartDate: true,
-          boardApprovalDate: true,
-          stakeholder: {
-            select: {
-              name: true,
-            },
-          },
-          shareClass: {
-            select: {
-              classType: true,
-            },
-          },
-          documents: {
-            select: {
-              id: true,
-              name: true,
-              uploader: {
-                select: {
-                  user: {
-                    select: {
-                      name: true,
-                      image: true,
-                    },
-                  },
-                },
-              },
-              bucket: {
-                select: {
-                  key: true,
-                  mimeType: true,
-                  size: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      return shares;
-    });
+    const data = shares.map(
+      ({ stakeholderName, shareClassName, shareClassType, ...share }) => ({
+        ...share,
+        // The table reads these as the joins Prisma used to return.
+        stakeholder: { name: stakeholderName },
+        shareClass: { name: shareClassName, classType: shareClassType },
+        documents: documents.get(share.id) ?? [],
+      }),
+    );
 
     return { data };
   },

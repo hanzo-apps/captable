@@ -1,4 +1,4 @@
-import { SafeTemplateEnum } from "@/prisma/enums";
+import { SafeTemplateEnum } from "@/server/captable-api";
 import { z } from "zod";
 import { ZodTemplateFieldRecipientSchema } from "../template-router/schema";
 

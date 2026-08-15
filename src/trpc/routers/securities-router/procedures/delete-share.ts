@@ -1,75 +1,44 @@
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
-import { withAuth, type withAuthTrpcContextType } from "@/trpc/api/trpc";
-import {
-  type TypeZodDeleteShareMutationSchema,
-  ZodDeleteShareMutationSchema,
-} from "../schema";
+import { captableFailure } from "@/server/captable-api";
+import { withAuth } from "@/trpc/api/trpc";
+import { ZodDeleteShareMutationSchema } from "../schema";
 
 export const deleteShareProcedure = withAuth
   .input(ZodDeleteShareMutationSchema)
-  .mutation(async (args) => {
-    return await deleteShareHandler(args);
-  });
+  .mutation(
+    async ({ ctx: { db, captable, session, requestIp, userAgent }, input }) => {
+      const user = session.user;
+      const { shareId } = input;
 
-interface deleteShareHandlerOptions {
-  input: TypeZodDeleteShareMutationSchema;
-  ctx: withAuthTrpcContextType;
-}
+      try {
+        // Read the row first so the audit entry still names the stakeholder it
+        // belonged to — a delete answers with no body to name them from.
+        const share = (await captable.shares.list()).find(
+          (s) => s.id === shareId,
+        );
 
-export async function deleteShareHandler({
-  ctx: { db, session, requestIp, userAgent },
-  input,
-}: deleteShareHandlerOptions) {
-  const user = session.user;
-  const { shareId } = input;
-  try {
-    await db.$transaction(async (tx) => {
-      const { companyId } = await checkMembership({ session, tx });
+        await captable.shares.remove(shareId);
 
-      const share = await tx.share.delete({
-        where: {
-          id: shareId,
-          companyId,
-        },
-        select: {
-          id: true,
-          stakeholder: {
-            select: {
-              id: true,
-              name: true,
-            },
+        const { companyId } = await checkMembership({ tx: db, session });
+        await Audit.create(
+          {
+            action: "share.deleted",
+            companyId,
+            actor: { type: "user", id: user.id },
+            context: { requestIp, userAgent },
+            target: [{ type: "share", id: shareId }],
+            summary: `${user.name} deleted share of stakholder ${
+              share?.stakeholderName ?? shareId
+            }`,
           },
-          company: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
+          db,
+        );
 
-      await Audit.create(
-        {
-          action: "share.deleted",
-          companyId: user.companyId,
-          actor: { type: "user", id: session.user.id },
-          context: {
-            requestIp,
-            userAgent,
-          },
-          target: [{ type: "share", id: share.id }],
-          summary: `${user.name} deleted share of stakholder ${share.stakeholder.name}`,
-        },
-        tx,
-      );
-    });
-
-    return { success: true };
-  } catch (err) {
-    console.error(err);
-    return {
-      success: false,
-      message: "Oops, something went wrong while deleting option.",
-    };
-  }
-}
+        return { success: true };
+      } catch (error) {
+        console.error(error);
+        return { success: false, message: captableFailure(error) };
+      }
+    },
+  );

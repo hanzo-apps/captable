@@ -1,75 +1,42 @@
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
-import { withAuth, type withAuthTrpcContextType } from "@/trpc/api/trpc";
-import {
-  type TypeZodDeleteOptionMutationSchema,
-  ZodDeleteOptionMutationSchema,
-} from "../schema";
+import { captableFailure } from "@/server/captable-api";
+import { withAuth } from "@/trpc/api/trpc";
+import { ZodDeleteOptionMutationSchema } from "../schema";
 
 export const deleteOptionProcedure = withAuth
   .input(ZodDeleteOptionMutationSchema)
-  .mutation(async (args) => {
-    return await deleteOptionHandler(args);
-  });
+  .mutation(
+    async ({ ctx: { db, captable, session, requestIp, userAgent }, input }) => {
+      const user = session.user;
+      const { optionId } = input;
 
-interface deleteOptionHandlerOptions {
-  input: TypeZodDeleteOptionMutationSchema;
-  ctx: withAuthTrpcContextType;
-}
+      try {
+        const option = (await captable.options.list()).find(
+          (o) => o.id === optionId,
+        );
 
-export async function deleteOptionHandler({
-  ctx: { db, session, requestIp, userAgent },
-  input,
-}: deleteOptionHandlerOptions) {
-  const user = session.user;
-  const { optionId } = input;
-  try {
-    await db.$transaction(async (tx) => {
-      const { companyId } = await checkMembership({ session, tx });
+        await captable.options.remove(optionId);
 
-      const option = await tx.option.delete({
-        where: {
-          id: optionId,
-          companyId,
-        },
-        select: {
-          id: true,
-          stakeholder: {
-            select: {
-              id: true,
-              name: true,
-            },
+        const { companyId } = await checkMembership({ tx: db, session });
+        await Audit.create(
+          {
+            action: "option.deleted",
+            companyId,
+            actor: { type: "user", id: user.id },
+            context: { requestIp, userAgent },
+            target: [{ type: "option", id: optionId }],
+            summary: `${user.name} deleted stock option of stakholder ${
+              option?.stakeholderName ?? optionId
+            }`,
           },
-          company: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
+          db,
+        );
 
-      await Audit.create(
-        {
-          action: "option.deleted",
-          companyId: user.companyId,
-          actor: { type: "user", id: session.user.id },
-          context: {
-            requestIp,
-            userAgent,
-          },
-          target: [{ type: "option", id: option.id }],
-          summary: `${user.name} deleted stock option of stakholder ${option.stakeholder.name}`,
-        },
-        tx,
-      );
-    });
-
-    return { success: true };
-  } catch (err) {
-    console.error(err);
-    return {
-      success: false,
-      message: "Oops, something went wrong while deleting option.",
-    };
-  }
-}
+        return { success: true };
+      } catch (error) {
+        console.error(error);
+        return { success: false, message: captableFailure(error) };
+      }
+    },
+  );

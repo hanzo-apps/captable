@@ -18,7 +18,8 @@ import {
   checkAccessControlMembership,
   getPermissions,
 } from "@/lib/rbac/access-control";
-import { getServerAuthSession } from "@/server/auth";
+import { getServerAuthSession, hanzoAccessToken } from "@/server/auth";
+import { captableApi } from "@/server/captable-api";
 import { db } from "@/server/db";
 import * as Sentry from "@sentry/nextjs";
 
@@ -39,11 +40,18 @@ interface Meta {
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await getServerAuthSession();
+  const [session, bearer] = await Promise.all([
+    getServerAuthSession(),
+    hanzoAccessToken(opts.headers),
+  ]);
 
   return {
     db,
     session,
+    // The cap table is read and written as this user against Hanzo Cloud, which
+    // derives the tenant from the token itself. Server-side only — it is on the
+    // context, never on the session.
+    captable: captableApi(bearer),
     requestIp: getIp(opts.headers),
     userAgent: getUserAgent(opts.headers),
     ...opts,

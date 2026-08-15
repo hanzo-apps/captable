@@ -231,7 +231,9 @@ export const columns: ColumnDef<Share[number]>[] = [
     ),
     cell: ({ row }) => (
       <div className="text-center">
-        {dayjsExt(row.original.boardApprovalDate).format("DD/MM/YYYY")}
+        {row.original.boardApprovalDate
+          ? dayjsExt(row.original.boardApprovalDate).format("DD/MM/YYYY")
+          : "—"}
       </div>
     ),
   },
