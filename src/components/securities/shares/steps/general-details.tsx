@@ -32,8 +32,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { SecuritiesStatusEnum, ShareLegendsEnum } from "@/prisma/enums";
 import { useAddShareFormValues } from "@/providers/add-share-form-provider";
+import { SecuritiesStatusEnum, ShareLegendsEnum } from "@/server/captable-api";
 import type { RouterOutputs } from "@/trpc/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RiAddFill } from "@remixicon/react";

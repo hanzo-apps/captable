@@ -1,10 +1,9 @@
 import EmptyState from "@/components/common/empty-state";
 import Tldr from "@/components/common/tldr";
 import { Card } from "@/components/ui/card";
-import { withServerComponentSession } from "@/server/auth";
-import { db } from "@/server/db";
 import type { EquityPlanMutationType } from "@/trpc/routers/equity-plan/schema";
 import type { ShareClassMutationType } from "@/trpc/routers/share-class/schema";
+import { api } from "@/trpc/server";
 import { RiAddFill, RiPieChart2Line } from "@remixicon/react";
 import type { Metadata } from "next";
 import { CreateEquityPlanButton } from "./create-equity-plan-button";
@@ -14,32 +13,16 @@ export const metadata: Metadata = {
   title: "Equity plans",
 };
 
-const getEquityPlans = async (companyId: string) => {
-  return await db.equityPlan.findMany({
-    where: { companyId },
-  });
-};
-
-const getShareClasses = async (companyId: string) => {
-  return await db.shareClass.findMany({
-    where: { companyId },
-  });
-};
-
 const EquityPlanPage = async () => {
-  const session = await withServerComponentSession();
-  const companyId = session?.user?.companyId;
-  let equityPlans: EquityPlanMutationType[] = [];
+  // Both lists are the cap table's, so both come from the one procedure that
+  // reads it — the page holds no second query of its own.
+  const [plans, classes] = await Promise.all([
+    api.equityPlan.getPlans.query(),
+    api.shareClass.get.query(),
+  ]);
 
-  if (companyId) {
-    equityPlans = (await getEquityPlans(
-      companyId,
-    )) as unknown as EquityPlanMutationType[];
-  }
-
-  const shareClasses: ShareClassMutationType[] = (await getShareClasses(
-    companyId,
-  )) as unknown as ShareClassMutationType[];
+  const equityPlans = plans.data as unknown as EquityPlanMutationType[];
+  const shareClasses = classes as unknown as ShareClassMutationType[];
 
   if (equityPlans.length === 0) {
     return (

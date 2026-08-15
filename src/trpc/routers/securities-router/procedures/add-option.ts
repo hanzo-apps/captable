@@ -1,80 +1,71 @@
 import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
+import { captableFailure } from "@/server/captable-api";
 import { withAuth } from "@/trpc/api/trpc";
 import { ZodAddOptionMutationSchema } from "../schema";
 
 export const addOptionProcedure = withAuth
   .input(ZodAddOptionMutationSchema)
   .mutation(async ({ ctx, input }) => {
-    const { userAgent, requestIp } = ctx;
+    const { userAgent, requestIp, captable, db, session } = ctx;
+    const user = session.user;
+
     try {
-      const user = ctx.session.user;
-      const documents = input.documents;
+      await captable.options.add({
+        stakeholderId: input.stakeholderId,
+        equityPlanId: input.equityPlanId,
+        notes: input.notes,
+        grantId: input.grantId,
+        quantity: input.quantity,
+        exercisePrice: input.exercisePrice,
+        type: input.type,
+        status: input.status,
+        cliffYears: input.cliffYears,
+        vestingYears: input.vestingYears,
+        issueDate: input.issueDate,
+        expirationDate: input.expirationDate,
+        vestingStartDate: input.vestingStartDate,
+        boardApprovalDate: input.boardApprovalDate,
+        rule144Date: input.rule144Date,
+      });
 
-      await ctx.db.$transaction(async (tx) => {
-        const { companyId } = await checkMembership({
-          tx,
-          session: ctx.session,
-        });
+      const { companyId } = await checkMembership({ tx: db, session });
 
-        const data = {
-          companyId,
-          stakeholderId: input.stakeholderId,
-          equityPlanId: input.equityPlanId,
-          notes: input.notes,
-          grantId: input.grantId,
-          quantity: input.quantity,
-          exercisePrice: input.exercisePrice,
-          type: input.type,
-          status: input.status,
-          cliffYears: input.cliffYears,
-          vestingYears: input.vestingYears,
-          issueDate: new Date(input.issueDate),
-          expirationDate: new Date(input.expirationDate),
-          vestingStartDate: new Date(input.vestingStartDate),
-          boardApprovalDate: new Date(input.boardApprovalDate),
-          rule144Date: new Date(input.rule144Date),
-        };
+      if (input.documents.length > 0) {
+        // The create answers with no body; the grant id is unique per company.
+        const option = (await captable.options.list()).find(
+          (o) => o.grantId === input.grantId,
+        );
 
-        const option = await tx.option.create({ data });
-
-        const bulkDocuments = documents.map((doc) => ({
-          companyId,
-          uploaderId: user.memberId,
-          publicId: generatePublicId(),
-          name: doc.name,
-          bucketId: doc.bucketId,
-          optionId: option.id,
-        }));
-
-        await tx.document.createMany({
-          data: bulkDocuments,
+        await db.document.createMany({
+          data: input.documents.map((doc) => ({
+            companyId,
+            uploaderId: user.memberId,
+            publicId: generatePublicId(),
+            name: doc.name,
+            bucketId: doc.bucketId,
+            optionId: option?.id ?? null,
+          })),
           skipDuplicates: true,
         });
+      }
 
-        await Audit.create(
-          {
-            action: "option.created",
-            companyId,
-            actor: { type: "user", id: user.id },
-            context: {
-              userAgent,
-              requestIp,
-            },
-            target: [{ type: "company", id: companyId }],
-            summary: `${user.name} added stock option for stakeholder ${input.stakeholderId}`,
-          },
-          tx,
-        );
-      });
+      await Audit.create(
+        {
+          action: "option.created",
+          companyId,
+          actor: { type: "user", id: user.id },
+          context: { userAgent, requestIp },
+          target: [{ type: "company", id: companyId }],
+          summary: `${user.name} added stock option for stakeholder ${input.stakeholderId}`,
+        },
+        db,
+      );
 
       return { success: true, message: "🎉 Successfully added an option" };
     } catch (error) {
       console.error("Error adding options:", error);
-      return {
-        success: false,
-        message: "Please use unique Grant Id.",
-      };
+      return { success: false, message: captableFailure(error) };
     }
   });

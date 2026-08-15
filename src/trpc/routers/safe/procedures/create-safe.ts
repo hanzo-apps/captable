@@ -6,22 +6,27 @@ import { invariant } from "@/lib/error";
 import { TAG } from "@/lib/tags";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
+import { captableFailure } from "@/server/captable-api";
 import { withAuth } from "@/trpc/api/trpc";
-import type { Prisma } from "@prisma/client";
 import { createBucketHandler } from "../../bucket-router/procedures/create-bucket";
 import { createTemplateHandler } from "../../template-router/procedures/create-template";
 import { ZodCreateSafeMutationSchema } from "../schema";
+import { safeBody } from "../wire";
 
 export const createSafeProcedure = withAuth
   .input(ZodCreateSafeMutationSchema)
   .mutation(async ({ ctx, input }) => {
-    const { userAgent, requestIp, session } = ctx;
-    const user = ctx.session.user;
+    const { userAgent, requestIp, session, captable, db } = ctx;
+    const user = session.user;
     const safeTemplate = input.safeTemplate;
 
     const { orderedDelivery, recipients, ...inputRest } = input;
 
     try {
+      // The SAFE lands upstream first. The bucket, template and audit below are
+      // this app's own rows, so a refusal up there leaves nothing behind here.
+      await captable.safes.add(safeBody(generatePublicId(), inputRest));
+
       let uploadData: Awaited<ReturnType<typeof uploadFile>> | null = null;
       let document: { name: string; bucketId: string } | null = null;
 
@@ -43,19 +48,13 @@ export const createSafeProcedure = withAuth
 
         uploadData = await uploadFile(
           file,
-          {
-            identifier: "templates",
-            keyPrefix: "new-safes",
-          },
+          { identifier: "templates", keyPrefix: "new-safes" },
           "privateBucket",
         );
       }
 
-      const { template } = await ctx.db.$transaction(async (tx) => {
-        const { companyId, memberId } = await checkMembership({
-          session,
-          tx,
-        });
+      const { template } = await db.$transaction(async (tx) => {
+        const { companyId, memberId } = await checkMembership({ session, tx });
 
         if (uploadData) {
           const { fileUrl: _fileUrl, ...rest } = uploadData;
@@ -96,42 +95,14 @@ export const createSafeProcedure = withAuth
           },
         });
 
-        type SafeCreateBody = Prisma.Args<typeof ctx.db.safe, "create">["data"];
-
-        let safeData: null | SafeCreateBody;
-
-        if (inputRest.safeTemplate === "CUSTOM") {
-          const { document, ...rest } = inputRest;
-
-          safeData = {
-            ...rest,
-            publicId: generatePublicId(),
-            companyId,
-            boardApprovalDate: new Date(rest.boardApprovalDate),
-            issueDate: new Date(rest.issueDate),
-          };
-        } else {
-          safeData = {
-            ...inputRest,
-            publicId: generatePublicId(),
-            companyId,
-            boardApprovalDate: new Date(inputRest.boardApprovalDate),
-            issueDate: new Date(inputRest.issueDate),
-          };
-        }
-
-        await tx.safe.create({
-          data: safeData,
-        });
-
         await Audit.create(
           {
             action: "safe.created",
-            companyId: user.companyId,
-            actor: { type: "user", id: ctx.session.user.id },
+            companyId,
+            actor: { type: "user", id: user.id },
             context: { requestIp, userAgent },
-            target: [{ type: "company", id: user.companyId }],
-            summary: `${ctx.session.user.name} created a new SAFE agreement with YC template.`,
+            target: [{ type: "company", id: companyId }],
+            summary: `${user.name} created a new SAFE agreement with YC template.`,
           },
           tx,
         );
@@ -146,9 +117,6 @@ export const createSafeProcedure = withAuth
       };
     } catch (error) {
       console.error("Error creating safe:", error);
-      return {
-        success: false as const,
-        message: "Oops ! Something went wrong. Please try again later",
-      };
+      return { success: false as const, message: captableFailure(error) };
     }
   });

@@ -5,6 +5,10 @@ import { ZodOnboardingMutationSchema } from "../onboarding-router/schema";
 import { ZodSwitchCompanyMutationSchema } from "./schema";
 
 export const companyRouter = createTRPCRouter({
+  // Stays local: `GET /v1/captable/company` carries id, name, publicId and the
+  // three incorporation fields, while this read also feeds the settings form the
+  // member's title and the company's logo, website, address, city, state,
+  // zipcode, country and incorporationDate. Moving it needs those on that route.
   getCompany: withAuth.query(async ({ ctx }) => {
     const user = ctx.session.user;
     const companyId = user.companyId;

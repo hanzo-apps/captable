@@ -21,8 +21,8 @@ import {
 import { StepperModalFooter, StepperPrev } from "@/components/ui/stepper";
 import Uploader from "@/components/ui/uploader";
 import { toTitleCase } from "@/lib/string";
-import { SafeTemplateEnum } from "@/prisma/enums";
 import { useFormValueState } from "@/providers/form-value-provider";
+import { SafeTemplateEnum } from "@/server/captable-api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import type { FileWithPath } from "react-dropzone";

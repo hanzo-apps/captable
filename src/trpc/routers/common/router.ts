@@ -3,39 +3,36 @@ import { createTRPCRouter, withAuth } from "@/trpc/api/trpc";
 
 export const commonRouter = createTRPCRouter({
   getContacts: withAuth.query(async ({ ctx }) => {
-    const { db, session } = ctx;
+    const { db, captable, session } = ctx;
     const user = session.user;
     const companyId = user.companyId;
     const contacts = [] as ShareContactType[];
 
-    const members = await db.member.findMany({
-      where: {
-        companyId,
-      },
+    const [members, stakeholders] = await Promise.all([
+      db.member.findMany({
+        where: {
+          companyId,
+        },
 
-      include: {
-        user: {
-          select: {
-            email: true,
-            name: true,
-            image: true,
+        include: {
+          user: {
+            select: {
+              email: true,
+              name: true,
+              image: true,
+            },
           },
         },
-      },
-    });
-
-    const stakeholders = await db.stakeholder.findMany({
-      where: {
-        companyId,
-      },
-    });
+      }),
+      captable.stakeholders.list(),
+    ]);
     (members || []).map((member) =>
       contacts.push({
         id: member.id,
-        image: member.user.image!,
-        email: member.user.email!,
-        value: member.user.email!,
-        name: member.user.name!,
+        image: member.user.image ?? undefined,
+        email: member.user.email ?? "",
+        value: member.user.email ?? "",
+        name: member.user.name ?? "",
         type: "member",
       }),
     );
@@ -45,7 +42,7 @@ export const commonRouter = createTRPCRouter({
         email: stakeholder.email,
         value: stakeholder.email,
         name: stakeholder.name,
-        institutionName: stakeholder.institutionName!,
+        institutionName: stakeholder.institutionName,
         type: "stakeholder",
       }),
     );

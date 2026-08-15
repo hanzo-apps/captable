@@ -139,24 +139,16 @@ model Company {
   zipcode       String
   country       String
 
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  updates          Update[]
-  users            Member[]
-  audits           Audit[]
-  shareClasses     ShareClass[]
-  equityPlans      EquityPlan[]
-  documents        Document[]
-  templates        Template[]
-  stakeholders     Stakeholder[]
-  investments      Investment[]
-  shares           Share[]
-  options          Option[]
-  safes            Safe[]
-  convertibleNotes ConvertibleNote[]
-  dataRooms        DataRoom[]
-  eSignAudits      EsignAudit[]
-  customRoles      CustomRole[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  updates     Update[]
+  users       Member[]
+  audits      Audit[]
+  documents   Document[]
+  templates   Template[]
+  dataRooms   DataRoom[]
+  eSignAudits EsignAudit[]
+  customRoles CustomRole[]
 
   BankAccount BankAccount[]
 
@@ -252,59 +244,6 @@ model CustomRole {
   @@index([companyId])
 }
 
-enum StakeholderTypeEnum {
-  INDIVIDUAL
-  INSTITUTION
-}
-
-enum StakeholderRelationshipEnum {
-  ADVISOR
-  BOARD_MEMBER
-  CONSULTANT
-  EMPLOYEE
-  EX_ADVISOR
-  EX_CONSULTANT
-  EX_EMPLOYEE
-  EXECUTIVE
-  FOUNDER
-  INVESTOR
-  NON_US_EMPLOYEE
-  OFFICER
-  OTHER
-}
-
-model Stakeholder {
-  id                  String                      @id @default(cuid())
-  name                String
-  email               String                      @unique
-  institutionName     String?
-  stakeholderType     StakeholderTypeEnum         @default(INDIVIDUAL)
-  currentRelationship StakeholderRelationshipEnum @default(EMPLOYEE)
-  taxId               String?
-
-  streetAddress String?
-  city          String?
-  state         String?
-  zipcode       String?
-  country       String  @default("US")
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  investments      Investment[]
-  shares           Share[]
-  options          Option[]
-  safes            Safe[]
-  convertibleNotes ConvertibleNote[]
-  updates          UpdateRecipient[]
-  dataRooms        DataRoomRecipient[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([companyId])
-}
-
 model Audit {
   id         String   @id @default(cuid())
   companyId  String
@@ -316,88 +255,6 @@ model Audit {
   target     Json[]
   context    Json
 
-  @@index([companyId])
-}
-
-enum ShareTypeEnum {
-  COMMON
-  PREFERRED
-}
-
-enum SharePrefixEnum {
-  CS // Common Shares
-  PS // Preferred Shares
-}
-
-enum ConversionRightsEnum {
-  CONVERTS_TO_FUTURE_ROUND
-  CONVERTS_TO_SHARE_CLASS_ID
-}
-
-// Based on OCF format
-// https://open-cap-table-coalition.github.io/Open-Cap-Format-OCF/schema_markdown/schema/objects/StockClass/
-model ShareClass {
-  id                      String          @id @default(cuid())
-  idx                     Int // auto-generated, auto-incremented based on company
-  name                    String
-  classType               ShareTypeEnum   @default(COMMON)
-  prefix                  SharePrefixEnum @default(CS)
-  initialSharesAuthorized BigInt
-  boardApprovalDate       DateTime
-  stockholderApprovalDate DateTime
-  votesPerShare           Int
-  parValue                Float
-  pricePerShare           Float
-  seniority               Int
-
-  // Conversion Rights
-  conversionRights       ConversionRightsEnum @default(CONVERTS_TO_FUTURE_ROUND)
-  convertsToShareClassId String?
-
-  liquidationPreferenceMultiple Float
-  participationCapMultiple      Float
-
-  companyId   String
-  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  equityPlans EquityPlan[]
-  investments Investment[]
-  shares      Share[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([companyId, idx])
-  @@index([companyId])
-}
-
-enum CancellationBehaviorEnum {
-  RETIRE
-  RETURN_TO_POOL
-  HOLD_AS_CAPITAL_STOCK
-  DEFINED_PER_PLAN_SECURITY
-}
-
-model EquityPlan {
-  id                         String                   @id @default(cuid())
-  name                       String
-  boardApprovalDate          DateTime
-  planEffectiveDate          DateTime?
-  initialSharesReserved      BigInt
-  defaultCancellatonBehavior CancellationBehaviorEnum
-  comments                   String?
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  shareClassId String
-  shareClass   ShareClass @relation(fields: [shareClassId], references: [id], onDelete: Cascade)
-
-  options Option[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([shareClassId])
   @@index([companyId])
 }
 
@@ -430,17 +287,12 @@ model Document {
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  shareId String?
-  share   Share?  @relation(fields: [shareId], references: [id], onDelete: SetNull)
-
-  optionId String?
-  option   Option? @relation(fields: [optionId], references: [id], onDelete: SetNull)
-
-  safeId String?
-  safe   Safe?   @relation(fields: [safeId], references: [id], onDelete: SetNull)
-
+  // The security these describe lives in Hanzo Cloud (/v1/captable), so each of
+  // these holds the id it assigned rather than referencing a local row.
+  shareId           String?
+  optionId          String?
+  safeId            String?
   convertibleNoteId String?
-  convertibleNote   ConvertibleNote? @relation(fields: [convertibleNoteId], references: [id], onDelete: SetNull)
 
   documentShares DocumentShare[]
   dataRooms      DataRoomDocument[]
@@ -501,8 +353,8 @@ model DataRoomRecipient {
   memberId String?
   member   Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
 
+  // A cap-table stakeholder id from Hanzo Cloud, not a local row.
   stakeholderId String?
-  stakeholder   Stakeholder? @relation(fields: [stakeholderId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -524,8 +376,8 @@ model UpdateRecipient {
   memberId String?
   member   Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
 
+  // A cap-table stakeholder id from Hanzo Cloud, not a local row.
   stakeholderId String?
-  stakeholder   Stakeholder? @relation(fields: [stakeholderId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -662,264 +514,6 @@ model EsignRecipient {
 
   @@index([memberId])
   @@index([templateId])
-}
-
-enum SecuritiesStatusEnum {
-  ACTIVE
-  DRAFT
-  SIGNED
-  PENDING
-}
-
-enum ShareLegendsEnum {
-  US_SECURITIES_ACT // US Securities Act of 1933
-  SALE_AND_ROFR // Sale and Right of first refusal
-  TRANSFER_RESTRICTIONS // Bylaw transfer restrictions
-}
-
-model Share {
-  id     String               @id @default(cuid())
-  status SecuritiesStatusEnum @default(DRAFT)
-
-  certificateId       String
-  quantity            Int // Number of shares
-  pricePerShare       Float?
-  capitalContribution Float? // Total amount of money contributed/invested
-  ipContribution      Float? // Value of the intellectual property contributed
-  debtCancelled       Float? // Amount of debt cancelled
-  otherContributions  Float? // Other contributions
-
-  cliffYears   Int @default(0) // 0 means immediate vesting, 1 means vesting starts after 1 year
-  vestingYears Int @default(0) // 0 means immediate vesting, 1 means vesting over 1 year
-
-  companyLegends ShareLegendsEnum[] @default([])
-
-  issueDate         DateTime
-  rule144Date       DateTime?
-  vestingStartDate  DateTime?
-  boardApprovalDate DateTime
-
-  stakeholderId String
-  stakeholder   Stakeholder @relation(fields: [stakeholderId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  shareClassId String
-  shareClass   ShareClass @relation(fields: [shareClassId], references: [id], onDelete: Cascade)
-
-  documents Document[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([companyId, certificateId])
-  @@index([companyId])
-  @@index([shareClassId])
-  @@index([stakeholderId])
-}
-
-enum OptionTypeEnum {
-  ISO // Incentive Stock Options
-  NSO // Non-satutory Stock Options
-  RSU // Restricted Stock Units
-}
-
-enum OptionStatusEnum {
-  DRAFT
-  ACTIVE
-  EXERCISED
-  EXPIRED
-  CANCELLED
-}
-
-model Option {
-  id            String @id @default(cuid())
-  grantId       String
-  quantity      Int
-  exercisePrice Float
-
-  type         OptionTypeEnum
-  status       OptionStatusEnum @default(DRAFT)
-  cliffYears   Int              @default(0) // 0 means immediate vesting, 1 means vesting starts after 1 year
-  vestingYears Int              @default(0) // 0 means immediate vesting, 1 means vesting over 1 year
-
-  issueDate         DateTime
-  expirationDate    DateTime
-  vestingStartDate  DateTime
-  boardApprovalDate DateTime
-  rule144Date       DateTime
-
-  documents Document[]
-
-  stakeholderId String
-  stakeholder   Stakeholder @relation(fields: [stakeholderId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  equityPlanId String
-  equityPlan   EquityPlan @relation(fields: [equityPlanId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([companyId, grantId])
-  @@index([companyId])
-  @@index([equityPlanId])
-  @@index([stakeholderId])
-}
-
-model Investment {
-  id       String   @id @default(cuid())
-  amount   Float // Amount of money invested
-  shares   BigInt // Number of shares issued to the investor at the time of investment
-  date     DateTime
-  comments String?
-
-  shareClassId String
-  shareClass   ShareClass @relation(fields: [shareClassId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  // Investors => StakeholderRelationshipEnum["INVESTOR"]
-  stakeholderId String
-  stakeholder   Stakeholder @relation(fields: [stakeholderId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([companyId])
-  @@index([stakeholderId])
-  @@index([shareClassId])
-}
-
-enum SafeTypeEnum {
-  PRE_MONEY
-  POST_MONEY
-}
-
-enum SafeStatusEnum {
-  DRAFT
-  ACTIVE
-  PENDING
-  EXPIRED
-  CANCELLED
-}
-
-// YC Standard Safe
-enum SafeTemplateEnum {
-  POST_MONEY_CAP      @map("Valuation Cap, no Discount")
-  POST_MONEY_DISCOUNT @map("Discount, no Valuation Cap")
-  POST_MONEY_MFN      @map("MFN, no Valuation Cap, no Discount")
-
-  POST_MONEY_CAP_WITH_PRO_RATA      @map("Valuation Cap, no Discount, include Pro Rata Rights")
-  POST_MONEY_DISCOUNT_WITH_PRO_RATA @map("Discount, no Valuation Cap, include Pro Rata Rights")
-  POST_MONEY_MFN_WITH_PRO_RATA      @map("MFN, no Valuation Cap, no Discount, include Pro Rata Rights")
-
-  CUSTOM @map("Custom")
-}
-
-model Safe {
-  id           String            @id @default(cuid())
-  publicId     String // eg. SAFE-01
-  type         SafeTypeEnum      @default(POST_MONEY)
-  status       SafeStatusEnum    @default(DRAFT)
-  capital      Float // Amount of money invested
-  safeTemplate SafeTemplateEnum?
-  safeId       String?
-
-  valuationCap    Float?
-  discountRate    Float?
-  mfn             Boolean @default(false) // Most Favored Nation
-  proRata         Boolean @default(false) // Pro Rata Rights
-  additionalTerms String?
-
-  documents Document[]
-
-  stakeholderId String
-  stakeholder   Stakeholder @relation(fields: [stakeholderId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  issueDate         DateTime
-  boardApprovalDate DateTime
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([publicId, companyId])
-  @@index([companyId])
-  @@index([stakeholderId])
-}
-
-enum ConvertibleStatusEnum {
-  DRAFT
-  ACTIVE
-  PENDING
-  EXPIRED
-  CANCELLED
-}
-
-enum ConvertibleTypeEnum {
-  CCD // Compulsory Convertible Debenture
-  OCD // Optionally Convertible Debenture
-  NOTE // Simple Convertible note
-}
-
-enum ConvertibleInterestMethodEnum {
-  SIMPLE
-  COMPOUND
-}
-
-enum ConvertibleInterestAccrualEnum {
-  DAILY
-  MONTHLY
-  SEMI_ANNUALLY
-  ANNUALLY
-  YEARLY
-  CONTINUOUSLY
-}
-
-enum ConvertibleInterestPaymentScheduleEnum {
-  DEFERRED
-  PAY_AT_MATURITY
-}
-
-model ConvertibleNote {
-  id       String                @id @default(cuid())
-  publicId String // eg. CN-01
-  status   ConvertibleStatusEnum @default(DRAFT)
-  type     ConvertibleTypeEnum   @default(NOTE)
-  capital  Float // Amount of money invested
-
-  conversionCap   Float?
-  discountRate    Float?
-  mfn             Boolean? // Most Favored Nation
-  additionalTerms String?
-
-  interestRate            Float?
-  interestMethod          ConvertibleInterestMethodEnum?
-  interestAccrual         ConvertibleInterestAccrualEnum?
-  interestPaymentSchedule ConvertibleInterestPaymentScheduleEnum?
-
-  documents Document[]
-
-  stakeholderId String
-  stakeholder   Stakeholder @relation(fields: [stakeholderId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  issueDate         DateTime
-  boardApprovalDate DateTime
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([publicId, companyId])
-  @@index([companyId])
-  @@index([stakeholderId])
 }
 
 enum UpdateStatusEnum {

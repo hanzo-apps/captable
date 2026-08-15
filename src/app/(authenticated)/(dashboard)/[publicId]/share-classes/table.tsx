@@ -12,6 +12,10 @@ import type { ShareClassMutationType } from "@/trpc/routers/share-class/schema";
 import { EditShareClassButton } from "./edit-share-class-button";
 const formatter = new Intl.NumberFormat("en-US");
 
+/** A date the cap table reports, or an em-dash when it reports none. */
+const localDate = (value: Date | string | null | undefined) =>
+  value ? new Date(value).toLocaleDateString("en-US") : "—";
+
 type ShareClassTableProps = {
   shareClasses: ShareClassMutationType[];
 };
@@ -38,12 +42,8 @@ const ShareClassTable = ({ shareClasses }: ShareClassTableProps) => {
               <TableCell>
                 {formatter.format(klass.initialSharesAuthorized)}
               </TableCell>
-              <TableCell>{`${new Date(
-                klass.boardApprovalDate,
-              ).toLocaleDateString("en-US")}`}</TableCell>
-              <TableCell>{`${new Date(
-                klass.stockholderApprovalDate,
-              ).toLocaleDateString("en-US")}`}</TableCell>
+              <TableCell>{localDate(klass.boardApprovalDate)}</TableCell>
+              <TableCell>{localDate(klass.stockholderApprovalDate)}</TableCell>
               <TableCell>
                 <EditShareClassButton
                   shareClass={{

@@ -24,8 +24,8 @@ import {
   useStepper,
 } from "@/components/ui/stepper";
 import { toTitleCase } from "@/lib/string";
-import { OptionStatusEnum, OptionTypeEnum } from "@/prisma/enums";
 import { useStockOptionFormValues } from "@/providers/stock-option-form-provider";
+import { OptionStatusEnum, OptionTypeEnum } from "@/server/captable-api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
