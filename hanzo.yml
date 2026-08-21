@@ -1,9 +1,0 @@
-# Next.js + Prisma cap-table service. The Dockerfile IS the gate: it runs
-# `pnpm i --frozen-lockfile` then `pnpm build`, so a type error or a broken
-# migration fails the image and nothing ships. A second `test:` block running
-# the same build on the runner would be one assertion written twice.
-images:
-  - name: captable
-    context: .
-    dockerfile: docker/Dockerfile
-    repo: ghcr.io/hanzoai/captable
