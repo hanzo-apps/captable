@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Self-contained goja bundle of the captable business logic — hosted in-process by hanzoai/cloud (HIP-0106). Source of truth: src/*.ts; artifact: bundle.js.",
+  "description": "Self-contained goja bundle of the captable business logic \u2014 hosted in-process by hanzoai/cloud (HIP-0106). Source of truth: src/*.ts; artifact: bundle.js.",
   "scripts": {
     "build": "node build.mjs",
     "test": "node test/bundle.test.mjs"
   },
   "devDependencies": {
-    "esbuild": "0.28.1"
+    "esbuild": "^0.28.2"
   }
 }
