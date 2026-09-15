@@ -20,9 +20,12 @@ const hasCredentials = accessKeyId && secretAccessKey;
 const PrivateBucket = env.UPLOAD_BUCKET_PRIVATE;
 const PublicBucket = env.UPLOAD_BUCKET_PUBLIC;
 
+// Path-style URLs (<endpoint>/<bucket>/<key>): the endpoint host serves every
+// bucket, so a signed URL never needs a per-bucket hostname.
 const S3 = new S3Client({
   region,
   endpoint,
+  forcePathStyle: true,
   credentials: hasCredentials
     ? {
         secretAccessKey,
