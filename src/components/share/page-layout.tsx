@@ -19,7 +19,7 @@ export const SharePageLayout = ({
   medium,
   children,
 }: SharePageLayoutProps) => (
-  <div className="flex min-h-screen justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-100 px-5 pb-5 pt-12">
+  <div className="flex min-h-screen justify-center bg-background px-5 pb-5 pt-12">
     <div className="mx-auto flex w-[1080px] max-w-sm flex-col sm:max-w-4xl">
       <div className="mb-16 flex items-center gap-3">
         <Avatar className="h-12 w-12 rounded">
@@ -40,7 +40,7 @@ export const SharePageLayout = ({
             href={`${process.env.NEXT_PUBLIC_APP_URL || "https://captable.hanzo.ai"}?utm_source=${company.name}&utm_medium=${medium}&utm_campaign=powered_by`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-bold text-teal-500 hover:underline"
+            className="font-bold text-foreground hover:underline"
           >
             {APP_NAME}
           </Link>

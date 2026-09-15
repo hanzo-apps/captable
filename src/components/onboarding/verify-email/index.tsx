@@ -50,8 +50,8 @@ const VerifyEmail = ({ token }: { token: string }) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-100">
-        <div className="grid w-full max-w-md grid-cols-1 gap-5 rounded-xl border bg-white p-10 shadow">
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="grid w-full max-w-md grid-cols-1 gap-5 rounded-xl border bg-card p-10 text-card-foreground shadow">
           <div className="flex flex-col gap-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Verifying...
@@ -63,13 +63,13 @@ const VerifyEmail = ({ token }: { token: string }) => {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-100">
-      <div className="grid w-full max-w-md grid-cols-1 gap-5 rounded-xl border bg-white p-10 shadow">
+    <div className="flex h-screen items-center justify-center bg-background">
+      <div className="grid w-full max-w-md grid-cols-1 gap-5 rounded-xl border bg-card p-10 text-card-foreground shadow">
         <div className="flex flex-col gap-y-2 text-center">
           {success ? (
             <>
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-teal-100">
-                <span className="text-teal-500">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <span className="text-foreground">
                   <RiMailCheckLine className="h-6 w-auto" />
                 </span>
               </div>

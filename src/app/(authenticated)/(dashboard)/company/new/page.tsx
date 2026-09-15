@@ -7,8 +7,8 @@ export const metadata: Metadata = {
 
 const OnboardingPage = async () => {
   return (
-    <div className="flex min-h-screen justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-100 px-5 pb-5 pt-20">
-      <div className="border-rounded w-full max-w-2xl border bg-white p-10 shadow">
+    <div className="flex min-h-screen justify-center bg-background px-5 pb-5 pt-20">
+      <div className="w-full max-w-2xl rounded-xl border bg-card p-10 text-card-foreground shadow">
         <div className="mb-5">
           <h1 className="text-2xl font-semibold tracking-tight">
             Welcome to {process.env.NEXT_PUBLIC_APP_NAME || "Hanzo Captable"}!
