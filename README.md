@@ -1,11 +1,8 @@
-> **The Captable app is developed at `hanzo-apps/captable`.** That repo and this
-> one sit at the same commit, and `github.com/hanzoai/captable` redirects there,
-> so there is one GitHub home: `hanzo-apps/captable`.
->
-> This copy stays readable because `github.com/hanzoai/captable` is the Go module
-> path the cloud binary imports, and the forge resolves that path here. It no
-> longer builds `ghcr.io/hanzoai/captable` and no longer mirrors to GitHub —
-> `hanzo-apps/captable` does both. Send changes there.
+> **`hanzo-apps/captable` builds `ghcr.io/hanzoai/captable`**: git.hanzo.ai
+> mirrors it and runs `.hanzo/workflows/cicd.yml` against `hanzo.yml`.
+> `github.com/hanzoai/captable` holds the same commits because it is the Go module
+> path the cloud binary imports. It has no forge build, so one repository
+> publishes the image. Push every commit to both.
 
 <p align="center"><img src=".github/hero.svg" alt="captable" width="880"></p>
 

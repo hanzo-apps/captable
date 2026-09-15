@@ -1,0 +1,10 @@
+# Next.js + Prisma cap-table app. docker/Dockerfile installs with
+# `pnpm i --frozen-lockfile` and runs `next build`, so a lockfile that disagrees
+# with package.json, or a build that fails, publishes no image.
+images:
+  - name: captable
+    context: .
+    dockerfile: docker/Dockerfile
+    repo: ghcr.io/hanzoai/captable
+    # The Dockerfile's base stage is FROM --platform=linux/amd64.
+    platforms: [linux/amd64]
