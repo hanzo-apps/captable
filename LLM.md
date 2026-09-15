@@ -9,7 +9,7 @@ Captable, Inc. is an open-source cap table management platform designed as an al
 - **API**: tRPC for type-safe APIs
 - **Authentication**: NextAuth with Passkey support
 - **Styling**: Tailwind CSS with shadcn/ui components
-- **Email**: React Email with Nodemailer
+- **Email**: React Email rendered to HTML, delivered by Hanzo notify (`POST /v1/notify/send/email`) as the app's IAM identity
 - **File Storage**: AWS S3 compatible (Minio for local dev)
 - **Payments**: hosted on billing.hanzo.ai / pay.hanzo.ai — the app only links out
 - **PDF**: PDF-lib for generation, React-PDF for viewing
