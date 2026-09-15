@@ -1,8 +1,8 @@
-> **`hanzo-apps/captable` builds `ghcr.io/hanzoai/captable`**: git.hanzo.ai
-> mirrors it and runs `.hanzo/workflows/cicd.yml` against `hanzo.yml`.
-> `github.com/hanzoai/captable` holds the same commits because it is the Go module
-> path the cloud binary imports. It has no forge build, so one repository
-> publishes the image. Push every commit to both.
+> **`hanzoai/captable` builds `ghcr.io/hanzoai/captable`**: git.hanzo.ai
+> mirrors it and runs `.hanzo/workflows/cicd.yml` against `hanzo.yml`. It is also
+> the Go module path the cloud binary imports. `hanzo-apps/captable` holds the
+> same commits and has no forge build, so one repository publishes the image.
+> Push every commit to both.
 
 <p align="center"><img src=".github/hero.svg" alt="captable" width="880"></p>
 
