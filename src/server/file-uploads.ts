@@ -89,7 +89,10 @@ export const getPresignedPutUrl = async ({
   return { url, key: Key, bucketUrl: bucketUrl.toString() };
 };
 
-export const getPresignedGetUrl = async (key: string) => {
+export const getPresignedGetUrl = async (
+  key: string,
+  expiresIn = TEN_MINUTES_IN_SECONDS,
+) => {
   const getObjectCommand = new GetObjectCommand({
     Bucket: PrivateBucket,
     Key: key,
@@ -97,9 +100,7 @@ export const getPresignedGetUrl = async (key: string) => {
     ResponseContentDisposition: "inline",
   });
 
-  const url = await getSignedUrl(S3, getObjectCommand, {
-    expiresIn: TEN_MINUTES_IN_SECONDS,
-  });
+  const url = await getSignedUrl(S3, getObjectCommand, { expiresIn });
 
   return { key, url };
 };

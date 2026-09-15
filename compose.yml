@@ -8,7 +8,6 @@ services:
     container_name: captable-app
     depends_on:
       - pg
-      - smtp
       - minio
     restart: always
     ports:
@@ -31,7 +30,6 @@ services:
     container_name: captable-studio
     depends_on:
       - pg
-      - smtp
       - minio
     restart: always
     ports:
@@ -58,13 +56,6 @@ services:
       - 54321:5432
     volumes:
       - postgres:/var/lib/postgresql/data
-
-  smtp:
-    image: axllent/mailpit
-    container_name: captable-smtp
-    ports:
-      - 8025:8025
-      - 1025:1025
 
   minio:
     image: minio/minio

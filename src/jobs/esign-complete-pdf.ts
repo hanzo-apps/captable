@@ -66,7 +66,8 @@ export const eSignCompletePDFWorker = defineWorker(config, async (job) => {
     });
   });
 
-  const file = await getPresignedGetUrl(bucketData.key);
+  // The emailed download link: seven days is the longest a SigV4 URL lives.
+  const file = await getPresignedGetUrl(bucketData.key, 7 * 24 * 60 * 60);
 
   await eSignConfirmationEmailJob.bulkEmit(
     recipients.map((recipient) => ({

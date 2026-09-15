@@ -39,23 +39,13 @@ export const eSignConfirmationEmailWorker = defineWorker(
         senderName: payload.senderName,
         senderEmail: payload.senderEmail,
         company: payload.company,
+        fileUrl: payload.fileUrl,
       }),
     );
     await sendMail({
       to: payload.recipient.email,
-      ...(payload.senderEmail && { replyTo: payload.senderEmail }),
       subject: "Completed e-signed documents from all parties",
       html,
-      attachments: [
-        {
-          filename: payload.documentName,
-          path: payload.fileUrl,
-        },
-      ],
-
-      headers: {
-        "X-From-Name": payload.senderName || "Captable",
-      },
     });
   },
 );

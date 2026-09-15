@@ -186,7 +186,6 @@ When contributing to <strong>Hanzo Captable</strong>, whether on GitHub or in ot
 
 - Install latest version of node and pnpm
 - Install latest version of postgres database
-- Install [mailpit](https://mailpit.axllent.org/docs/install/) for SMTP and email interception
 - Create database `captable` in postgres database
 - Update `.env` file's `DATABASE_URL` with database credentials
 - For a quick start, you can use [Supabase database](https://supabase.com/) or [Neon](https://neon.tech/) as well.

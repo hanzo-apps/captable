@@ -98,12 +98,8 @@ export const eSignNotificationEmailWorker = defineWorker(
     );
     await sendMail({
       to: email,
-      ...(sender?.email && { replyTo: sender.email }),
       subject: "eSign Document Request",
       html,
-      headers: {
-        "X-From-Name": sender?.name || "Captable",
-      },
     });
   },
 );

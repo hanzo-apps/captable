@@ -38,8 +38,6 @@ export const env = createEnv({
       .transform((s) => s !== "false" && s !== "0"),
     NEXTAUTH_URL: z.string(),
     NEXTAUTH_SECRET: z.string(),
-    EMAIL_SERVER: z.string().optional(),
-    EMAIL_FROM: z.string(),
 
     // upload
     UPLOAD_ENDPOINT: z.string(),
@@ -89,8 +87,6 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    EMAIL_SERVER: process.env.EMAIL_SERVER,
-    EMAIL_FROM: process.env.EMAIL_FROM,
 
     UPLOAD_ENDPOINT: process.env.UPLOAD_ENDPOINT,
     UPLOAD_REGION: process.env.UPLOAD_REGION,

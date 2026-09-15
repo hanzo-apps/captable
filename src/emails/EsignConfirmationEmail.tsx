@@ -1,25 +1,26 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
   Hr,
   Html,
   Preview,
+  Section,
   Tailwind,
   Text,
 } from "@react-email/components";
 
 import type { TSchema } from "../jobs/esign-confirmation-email";
 
-type Payload = Omit<TSchema, "fileUrl">;
-
 const ESignConfirmationEmail = ({
   documentName,
   recipient,
   senderName,
   company,
-}: Payload) => {
+  fileUrl,
+}: TSchema) => {
   return (
     <Html>
       <Head />
@@ -40,9 +41,18 @@ const ESignConfirmationEmail = ({
 
             <Text className="mt-5 text-[14px] leading-[24px] text-black">
               All parties have completed and signed the document -{" "}
-              <strong>{documentName}</strong>. Please find the attached
-              document.
+              <strong>{documentName}</strong>. The download link below works
+              for 7 days.
             </Text>
+
+            <Section className="mx-auto my-[32px] text-center">
+              <Button
+                className="rounded bg-black px-5 py-3 text-center text-[12px] font-semibold text-white no-underline"
+                href={fileUrl}
+              >
+                Download the signed document
+              </Button>
+            </Section>
 
             <Text className="mt-[20px] !text-[14px] leading-[24px] text-black">
               - {senderName}
@@ -60,6 +70,7 @@ const ESignConfirmationEmail = ({
 };
 
 ESignConfirmationEmail.PreviewProps = {
+  fileUrl: "https://example.com/document.pdf",
   documentName: "Document Name",
   recipient: { name: "Recipient Name", email: "" },
   senderName: "Sender Name",

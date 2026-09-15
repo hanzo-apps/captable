@@ -27,11 +27,9 @@ export const shareDataRoomEmailWorker = defineWorker(config, async (job) => {
     recipientName,
     senderName,
     email,
-    senderEmail,
   } = job.data;
   await sendMail({
     to: email,
-    ...(senderEmail && { replyTo: senderEmail }),
     subject: `${senderName} shared a data room - ${dataRoom}`,
     html: await render(
       ShareDataRoomEmail({
@@ -42,9 +40,5 @@ export const shareDataRoomEmailWorker = defineWorker(config, async (job) => {
         link,
       }),
     ),
-
-    headers: {
-      "X-From-Name": senderName,
-    },
   });
 });

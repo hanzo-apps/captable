@@ -29,11 +29,9 @@ export const shareUpdateEmailWorker = defineWorker(config, async (job) => {
     recipientName,
     senderName,
     email,
-    senderEmail,
   } = job.data;
   await sendMail({
     to: email,
-    ...(senderEmail && { replyTo: senderEmail }),
     subject: `${senderName} shared an update - ${update.title}`,
     html: await render(
       ShareUpdateEmail({
@@ -44,9 +42,5 @@ export const shareUpdateEmailWorker = defineWorker(config, async (job) => {
         link,
       }),
     ),
-
-    headers: {
-      "X-From-Name": senderName,
-    },
   });
 });
