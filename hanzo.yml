@@ -1,6 +1,18 @@
 # Next.js + Prisma cap-table app. docker/Dockerfile installs with
 # `pnpm i --frozen-lockfile` and runs `next build`, so a lockfile that disagrees
 # with package.json, or a build that fails, publishes no image.
+
+test:
+  # src/: every route is /v1 and no /api/ path is served or called
+  # (src/routes.test.ts), plus the unit suites. goja/test/*.mjs are node
+  # scripts, not vitest suites, so the run is scoped to src/.
+  - name: unit
+    run: |
+      set -e
+      corepack enable
+      pnpm install --frozen-lockfile --ignore-scripts
+      pnpm exec vitest run src/
+
 images:
   - name: captable
     context: .

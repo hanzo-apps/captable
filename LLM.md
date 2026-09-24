@@ -52,7 +52,7 @@ src/
 │   ├── (authenticated)/    # Protected routes (dashboard, etc.)
 │   ├── (unauthenticated)/ # Public routes (login, signup, etc.)
 │   ├── (documents)/       # Document-related pages
-│   └── api/               # API routes (auth, trpc)
+│   └── v1/                # every route: iam (next-auth), trpc, the REST API
 ├── components/            # React components organized by feature
 ├── server/               # Server-side utilities and services
 ├── trpc/                 # tRPC setup and routers
@@ -126,6 +126,24 @@ src/
 - `bucket`: File storage operations
 - `common`: Shared utilities
 
+## Routes
+
+Everything the app serves is under `/v1` (HIP-0111; no `/api/` prefix):
+- `/v1/iam/*` — next-auth (`src/app/v1/iam/[...nextauth]`). The IAM callback is
+  `https://captable.hanzo.ai/v1/iam/callback/hanzo-iam`, registered on
+  `admin/hanzo-captable` and declared in universe `iam-provision.yaml`.
+  `SessionProvider basePath` and the `NEXTAUTH_URL` path both read
+  `AUTH_BASE_PATH` (`src/constants/auth.ts`).
+- `/v1/trpc/*` — tRPC (`src/app/v1/trpc/[trpc]`).
+- `/v1/companies`, `/v1/schema`, `/v1/swagger`, `/v1/docs` — the Hono REST API
+  (`src/app/v1/[[...route]]`, routes name their own `/v1`).
+
+On `captable.hanzo.ai` every other `/v1` path is cloud's (universe
+`hanzo-domains.yaml` `v1-hanzo-ai`); the paths above reach this pod through the
+higher-priority `captable-hanzo-ai` IngressRoute in universe `captable.yaml`.
+`src/routes.test.ts` fails if `src/app/api` returns or any source names an
+`/api/` path; `hanzo.yml` runs it before every image.
+
 ## Development Patterns
 
 ### Authentication Flow
@@ -158,7 +176,8 @@ Uses pg-boss for job queuing:
 
 Key environment variables:
 - `DATABASE_URL`: PostgreSQL connection
-- `NEXTAUTH_URL/SECRET`: Authentication config
+- `NEXTAUTH_URL`: `<origin>/v1/iam` — next-auth v4 mounts itself at this URL's path; `src/env.js` refuses any other
+- `NEXTAUTH_SECRET`: Authentication config
 - `EMAIL_*`: SMTP configuration
 - `UPLOAD_*`: S3-compatible storage config
 - `NEXT_PUBLIC_BILLING_URL` / `NEXT_PUBLIC_PAY_URL`: override the hosted billing

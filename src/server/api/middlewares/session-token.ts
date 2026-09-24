@@ -68,7 +68,7 @@ async function fetchSessionFromAuthUrl(
 ): Promise<Session> {
   const rawRequest = c.req.raw;
   const clonedRequest = rawRequest.clone();
-  const newUrl = new URL("/api/auth/session", authUrl).toString();
+  const newUrl = new URL("/v1/iam/session", authUrl).toString();
 
   const response = await fetch(
     new Request(newUrl, {

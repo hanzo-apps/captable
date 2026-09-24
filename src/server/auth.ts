@@ -80,7 +80,7 @@ declare module "next-auth/jwt" {
     organization?: string;
     // The IAM token the cap-table backend authenticates with. It lives here and
     // only here: the JWT is an encrypted httpOnly cookie, while `session` is
-    // served to the browser verbatim at /api/auth/session.
+    // served to the browser verbatim at /v1/iam/session.
     hanzoToken?: string;
     hanzoTokenExpires?: number;
   }

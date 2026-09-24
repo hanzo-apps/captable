@@ -24,9 +24,11 @@ declare module "hono" {
 }
 
 export function PublicAPI() {
+  // Routes name their own version (/v1/companies, see utils/endpoint-creator),
+  // served by src/app/v1/[[...route]]; there is no prefix in front of them.
   const api = new OpenAPIHono({
     defaultHook: handleZodError,
-  }).basePath("/api");
+  });
 
   api.onError(handleError);
 
@@ -36,7 +38,7 @@ export function PublicAPI() {
       version: "v1",
       title: `${process.env.NEXT_PUBLIC_APP_NAME || "Hanzo Captable"} API (v1)`,
     },
-    servers: [{ url: `${env.NEXTAUTH_URL}` }],
+    servers: [{ url: env.NEXT_PUBLIC_BASE_URL }],
   }));
 
   api.openAPIRegistry.registerComponent(

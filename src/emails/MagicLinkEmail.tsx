@@ -62,7 +62,7 @@ export const MagicLinkEmail = ({ magicLink }: MagicLinkEmailProps) => (
 );
 
 MagicLinkEmail.PreviewProps = {
-  magicLink: `${constants.url}/api/auth/callback/email?callbackUrl=http%3A%2F%2Flocalhost%3A3000%2Fonboarding&token=671d9eac4043bbe1c22aeafd419ddfe79c2282ec755c558ea789671fdaffe8dd&email=ceo%40example.com`,
+  magicLink: `${constants.url}/v1/iam/callback/email?callbackUrl=http%3A%2F%2Flocalhost%3A3000%2Fonboarding&token=671d9eac4043bbe1c22aeafd419ddfe79c2282ec755c558ea789671fdaffe8dd&email=ceo%40example.com`,
 } as MagicLinkEmailProps;
 
 export default MagicLinkEmail;

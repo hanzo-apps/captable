@@ -36,7 +36,19 @@ export const env = createEnv({
       .string()
       .default("0")
       .transform((s) => s !== "false" && s !== "0"),
-    NEXTAUTH_URL: z.string(),
+    // next-auth v4 mounts itself at the PATH of this URL, and the handler lives
+    // at src/app/v1/iam/[...nextauth] (AUTH_BASE_PATH in src/constants/auth.ts).
+    // A bare origin would announce a callback under next-auth's default mount,
+    // which nothing serves, so any other path is refused here.
+    NEXTAUTH_URL: z
+      .string()
+      .url()
+      .refine(
+        (str) =>
+          URL.canParse(str) &&
+          new URL(str).pathname.replace(/\/$/, "") === "/v1/iam",
+        "NEXTAUTH_URL must be <origin>/v1/iam",
+      ),
     NEXTAUTH_SECRET: z.string(),
 
     // upload
