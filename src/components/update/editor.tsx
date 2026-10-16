@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownButton } from "@/components/ui/dropdown-button";
+import { cleanBlocks } from "@/lib/update-blocks";
 import { api } from "@/trpc/react";
 import type { Block, PartialBlock } from "@blocknote/core";
 import type { Update } from "@prisma/client";
@@ -166,8 +167,12 @@ const UpdatesEditor = ({
   ];
 
   const [title, setTitle] = useState<string>(update?.title ?? "");
+  // Stored blocks are loaded through the same cleaning the server applies on
+  // save, so an update written before that cleaning opens without unsafe links.
   const [content, setContent] = useState<Block[]>(
-    (update?.content as Block[]) ?? defaultContent,
+    update?.content
+      ? (cleanBlocks(update.content) as unknown as Block[])
+      : defaultContent,
   );
   const [loading, setLoading] = useState<boolean>(false);
 
