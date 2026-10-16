@@ -1,6 +1,7 @@
 import { getRoleById } from "@/lib/rbac/access-control";
 import { Audit } from "@/server/audit";
 import { withAccessControl } from "@/trpc/api/trpc";
+import { TRPCError } from "@trpc/server";
 import { ZodUpdateMemberMutationSchema } from "../schema";
 
 export const updateMemberProcedure = withAccessControl
@@ -21,6 +22,14 @@ export const updateMemberProcedure = withAccessControl
 
       await db.$transaction(async (tx) => {
         const role = await getRoleById({ tx, id: roleId });
+        // A role grants what its holder could already grant, so only an ADMIN
+        // makes another ADMIN.
+        if (role.role === "ADMIN" && membership.role !== "ADMIN") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Only an admin can make another member an admin.",
+          });
+        }
 
         const member = await tx.member.update({
           where: {

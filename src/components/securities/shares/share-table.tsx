@@ -35,7 +35,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { getPresignedGetUrl } from "@/server/file-uploads";
+import { presignDownload } from "@/server/storage";
 import { api } from "@/trpc/react";
 import {
   DropdownMenu,
@@ -252,7 +252,7 @@ export const columns: ColumnDef<Share[number]>[] = [
       const documents = row?.original?.documents;
 
       const openFileOnTab = async (key: string) => {
-        const fileUrl = await getPresignedGetUrl(key);
+        const fileUrl = await presignDownload(key);
         window.open(fileUrl.url, "_blank");
       };
 

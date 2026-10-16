@@ -1,7 +1,7 @@
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { createTRPCRouter, withAuth } from "@/trpc/api/trpc";
+import { createTRPCRouter, withAccessControl } from "@/trpc/api/trpc";
 import { EquityPlanMutationSchema } from "./schema";
 
 /** The wire body an equity plan is created with. */
@@ -18,11 +18,14 @@ const body = (input: Record<string, unknown>) => ({
 });
 
 export const equityPlanRouter = createTRPCRouter({
-  getPlans: withAuth.query(async ({ ctx }) => ({
-    data: await ctx.captable.plans.list(),
-  })),
+  getPlans: withAccessControl
+    .meta({ policies: { securities: { allow: ["read"] } } })
+    .query(async ({ ctx }) => ({
+      data: await ctx.captable.plans.list(),
+    })),
 
-  create: withAuth
+  create: withAccessControl
+    .meta({ policies: { securities: { allow: ["create"] } } })
     .input(EquityPlanMutationSchema)
     .mutation(async ({ ctx, input }) => {
       const { userAgent, requestIp, captable, db, session } = ctx;
@@ -54,12 +57,15 @@ export const equityPlanRouter = createTRPCRouter({
   // on /v1/captable/plans/{id} — measured, PUT/PATCH/POST all 404 there while
   // the sibling classes route answers PATCH. Amending a plan needs
   // `PATCH /v1/captable/plans/{id}`.
-  update: withAuth.input(EquityPlanMutationSchema).mutation(({ input }) => {
-    console.error("equityPlan.update: no upstream route", { id: input.id });
-    return {
-      success: false,
-      message:
-        "Editing an equity plan is not available yet. Hanzo Cloud serves no update route for plans.",
-    };
-  }),
+  update: withAccessControl
+    .meta({ policies: { securities: { allow: ["update"] } } })
+    .input(EquityPlanMutationSchema)
+    .mutation(({ input }) => {
+      console.error("equityPlan.update: no upstream route", { id: input.id });
+      return {
+        success: false,
+        message:
+          "Editing an equity plan is not available yet. Hanzo Cloud serves no update route for plans.",
+      };
+    }),
 });

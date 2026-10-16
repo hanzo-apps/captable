@@ -7,13 +7,8 @@ export const metadata: Metadata = {
   title: "Security",
 };
 
+// Sign-in and its password are Hanzo's; nothing here holds one.
 const SecurityLists = [
-  {
-    title: "Password",
-    description: "Update your password to keep your account secure and safe.",
-    href: "security/password",
-    buttonDisplayName: "Update password",
-  },
   {
     title: "Passkeys",
     description: "Add, delete or update passkey configuration.",
@@ -33,7 +28,7 @@ export default async function SecurityPage() {
     <>
       <SettingsHeader
         title="Security"
-        subtitle="Manage your password and security settings."
+        subtitle="Manage your security settings."
         showBackArrow={false}
       />
       {SecurityLists.map((security) => (

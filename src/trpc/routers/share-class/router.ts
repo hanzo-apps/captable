@@ -1,7 +1,7 @@
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { createTRPCRouter, withAuth } from "@/trpc/api/trpc";
+import { createTRPCRouter, withAccessControl } from "@/trpc/api/trpc";
 import { ShareClassMutationSchema } from "./schema";
 
 /** The wire body a share class is created or amended with. */
@@ -24,7 +24,8 @@ const body = (input: Record<string, unknown>) => ({
 });
 
 export const shareClassRouter = createTRPCRouter({
-  create: withAuth
+  create: withAccessControl
+    .meta({ policies: { securities: { allow: ["create"] } } })
     .input(ShareClassMutationSchema)
     .mutation(async ({ ctx, input }) => {
       const { userAgent, requestIp, captable, db, session } = ctx;
@@ -54,7 +55,8 @@ export const shareClassRouter = createTRPCRouter({
       }
     }),
 
-  update: withAuth
+  update: withAccessControl
+    .meta({ policies: { securities: { allow: ["update"] } } })
     .input(ShareClassMutationSchema)
     .mutation(async ({ ctx, input }) => {
       const { userAgent, requestIp, captable, db, session } = ctx;
@@ -83,11 +85,13 @@ export const shareClassRouter = createTRPCRouter({
       }
     }),
 
-  get: withAuth.query(async ({ ctx }) => {
-    const classes = await ctx.captable.classes.list();
-    return classes.map(({ companyName, ...shareClass }) => ({
-      ...shareClass,
-      company: { name: companyName },
-    }));
-  }),
+  get: withAccessControl
+    .meta({ policies: { securities: { allow: ["read"] } } })
+    .query(async ({ ctx }) => {
+      const classes = await ctx.captable.classes.list();
+      return classes.map(({ companyName, ...shareClass }) => ({
+        ...shareClass,
+        company: { name: companyName },
+      }));
+    }),
 });

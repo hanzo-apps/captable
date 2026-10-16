@@ -21,7 +21,6 @@ export type TypeZodInviteMemberArrayMutationSchema = z.infer<
 >;
 
 export const ZodAcceptMemberMutationSchema = z.object({
-  memberId: z.string().min(1),
   name: z.string().min(1, "This field is required"),
   token: z.string().min(1),
   workEmail: z.string().email().min(1, "This field is required"),
@@ -32,7 +31,6 @@ export type TypeZodAcceptMemberMutationSchema = z.infer<
 >;
 
 export const ZodRevokeInviteMutationSchema = z.object({
-  email: z.string().email().min(1),
   memberId: z.string().min(1),
 });
 

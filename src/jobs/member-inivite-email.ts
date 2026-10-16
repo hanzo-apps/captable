@@ -10,7 +10,6 @@ const config = defineWorkerConfig({
   name: "email.member-invite",
   schema: z.object({
     email: z.string(),
-    passwordResetToken: z.string(),
     user: z.object({
       email: z.string().email().nullish(),
       name: z.string().nullish(),
@@ -25,18 +24,13 @@ const config = defineWorkerConfig({
 
 export const sendMemberInviteEmailJob = defineJob(config);
 export const sendMemberInviteEmailWorker = defineWorker(config, async (job) => {
-  const { email, passwordResetToken, verificationToken, company, user } =
-    job.data;
+  const { email, verificationToken, company, user } = job.data;
 
   const baseUrl = env.NEXT_PUBLIC_BASE_URL;
 
-  const params = new URLSearchParams({
-    passwordResetToken,
-    email,
-  });
-
-  const inviteLink = `${baseUrl}/verify-member/${verificationToken}?${params.toString()}`;
-  console.log("sending invite email to", email, ": ", inviteLink);
+  // The link is the invitation's secret, so it goes in the mail and nowhere else.
+  const inviteLink = `${baseUrl}/verify-member/${verificationToken}`;
+  console.log("sending invite email to", email);
 
   await sendMail({
     to: email,

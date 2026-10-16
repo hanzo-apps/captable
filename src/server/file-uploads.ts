@@ -1,7 +1,10 @@
-"use server";
+// Server-only: these sign with the store's own credentials and check nothing.
+// The browser reaches them only through the checks in ./storage.ts.
+import "server-only";
 
 import path from "node:path";
 import { customId } from "@/common/id";
+import { putFile } from "@/common/put-file";
 import { env } from "@/env";
 import {
   DeleteObjectCommand,
@@ -112,4 +115,41 @@ export const deleteBucketFile = async (key: string) => {
       Key: key,
     }),
   );
+};
+
+/** Uploads a file the server holds (a generated PDF), signing the PUT itself. */
+export const storeFile = async (
+  file: File,
+  options: Pick<
+    getPresignedUrlOptions,
+    "expiresIn" | "keyPrefix" | "identifier"
+  >,
+  bucketMode: "publicBucket" | "privateBucket" = "privateBucket",
+) => {
+  const presigned = await getPresignedPutUrl({
+    contentType: file.type,
+    fileName: file.name,
+    bucketMode,
+    ...options,
+  });
+  return putFile(file, presigned, bucketMode);
+};
+
+/** Reads an object's bytes from the private bucket. */
+export const getFileFromS3 = async (key: string) => {
+  const { url } = await getPresignedGetUrl(key);
+
+  const response = await fetch(url, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to get file "${key}", failed with status code ${response.status}`,
+    );
+  }
+
+  const buffer = await response.arrayBuffer();
+
+  return new Uint8Array(buffer);
 };

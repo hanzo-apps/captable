@@ -1,25 +1,23 @@
 import { Audit } from "@/server/audit";
-import { checkMembership } from "@/server/auth";
 import { revokeExistingInviteTokens } from "@/server/member";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodRevokeInviteMutationSchema } from "../schema";
 import { removeMemberHandler } from "./remove-member";
 
-export const revokeInviteProcedure = withAuth
+export const revokeInviteProcedure = withAccessControl
   .input(ZodRevokeInviteMutationSchema)
+  .meta({ policies: { members: { allow: ["delete"] } } })
   .mutation(async ({ ctx, input }) => {
-    const { db, session, requestIp, userAgent } = ctx;
+    const { db, session, requestIp, userAgent, membership } = ctx;
     const user = session.user;
-    const { memberId, email } = input;
+    const { memberId } = input;
 
     await db.$transaction(async (tx) => {
-      await checkMembership({ session, tx });
-
-      await revokeExistingInviteTokens({ memberId, email, tx });
-
-      const member = await tx.member.findFirst({
+      const member = await tx.member.findFirstOrThrow({
         where: {
           id: memberId,
+          companyId: membership.companyId,
+          status: "PENDING",
         },
         select: {
           userId: true,
@@ -39,7 +37,7 @@ export const revokeInviteProcedure = withAuth
       await Audit.create(
         {
           action: "member.revoked-invite",
-          companyId: user.companyId,
+          companyId: membership.companyId,
           actor: { type: "user", id: user.id },
           context: {
             requestIp,
@@ -50,6 +48,8 @@ export const revokeInviteProcedure = withAuth
         },
         tx,
       );
+
+      await revokeExistingInviteTokens({ memberId, tx });
 
       await removeMemberHandler({
         ctx: { ...ctx, db: tx },

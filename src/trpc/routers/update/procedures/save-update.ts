@@ -1,9 +1,11 @@
 import { generatePublicId } from "@/common/id";
+import { RBAC } from "@/lib/rbac";
 import { Audit } from "@/server/audit";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { UpdateMutationSchema } from "../schema";
 
-export const saveUpdateProcedure = withAuth
+export const saveUpdateProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["create", "update"] } } })
   .input(UpdateMutationSchema)
   .mutation(async ({ ctx, input }) => {
     try {
@@ -15,6 +17,11 @@ export const saveUpdateProcedure = withAuth
       const publicId = input.publicId ?? generatePublicId();
       const { title, content, html } = input;
 
+      const action = input.publicId ? "update" : "create";
+      if (!RBAC.allows(ctx.permissions, "updates", action)) {
+        return { success: false, message: "You may not do this." };
+      }
+
       if (title.length === 0 || content.length === 0) {
         return {
           success: false,
@@ -24,7 +31,7 @@ export const saveUpdateProcedure = withAuth
       await ctx.db.$transaction(async (tx) => {
         if (input.publicId) {
           const update = await tx.update.update({
-            where: { publicId },
+            where: { publicId, companyId },
             data: {
               html,
               title,

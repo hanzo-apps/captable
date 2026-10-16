@@ -69,6 +69,17 @@ const PublicUpdatePage = async ({
     return notFound();
   }
 
+  // The link names the recipient it was sent to; unsharing removes that row,
+  // which ends the link at once rather than when it expires.
+  const recipient = await db.updateRecipient.findFirst({
+    where: { id: String(payload.recipientId), updateId: update.id },
+    select: { id: true },
+  });
+
+  if (!recipient) {
+    return notFound();
+  }
+
   const canRenderInPublic =
     update.status === UpdateStatusEnum.PUBLIC && update.public;
 

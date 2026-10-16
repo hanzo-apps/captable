@@ -2,10 +2,10 @@ import {
   type TESignNotificationEmailJobInput,
   eSignNotificationEmailJob,
 } from "@/jobs/esign-email";
-import { decode, encode } from "@/lib/jwt";
+import { decode, encodeShare } from "@/lib/jwt";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { ZodAddFieldMutationSchema } from "../schema";
@@ -31,7 +31,7 @@ export function EncodeEmailToken({
     id: templateId,
   };
 
-  return encode(encodeToken);
+  return encodeShare(encodeToken);
 }
 
 export async function DecodeEmailToken(jwt: string) {
@@ -39,7 +39,8 @@ export async function DecodeEmailToken(jwt: string) {
   return emailTokenPayloadSchema.parse(payload);
 }
 
-export const addFieldProcedure = withAuth
+export const addFieldProcedure = withAccessControl
+  .meta({ policies: { documents: { allow: ["update"] } } })
   .input(ZodAddFieldMutationSchema)
   .mutation(async ({ ctx, input }) => {
     try {

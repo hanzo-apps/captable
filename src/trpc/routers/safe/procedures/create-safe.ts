@@ -1,19 +1,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import { generatePublicId } from "@/common/id";
-import { uploadFile } from "@/common/uploads";
 import { invariant } from "@/lib/error";
 import { TAG } from "@/lib/tags";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { withAuth } from "@/trpc/api/trpc";
+import { storeFile } from "@/server/file-uploads";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { createBucketHandler } from "../../bucket-router/procedures/create-bucket";
 import { createTemplateHandler } from "../../template-router/procedures/create-template";
 import { ZodCreateSafeMutationSchema } from "../schema";
 import { safeBody } from "../wire";
 
-export const createSafeProcedure = withAuth
+export const createSafeProcedure = withAccessControl
+  .meta({ policies: { securities: { allow: ["create"] } } })
   .input(ZodCreateSafeMutationSchema)
   .mutation(async ({ ctx, input }) => {
     const { userAgent, requestIp, session, captable, db } = ctx;
@@ -27,7 +28,7 @@ export const createSafeProcedure = withAuth
       // this app's own rows, so a refusal up there leaves nothing behind here.
       await captable.safes.add(safeBody(generatePublicId(), inputRest));
 
-      let uploadData: Awaited<ReturnType<typeof uploadFile>> | null = null;
+      let uploadData: Awaited<ReturnType<typeof storeFile>> | null = null;
       let document: { name: string; bucketId: string } | null = null;
 
       if (input.safeTemplate !== "CUSTOM") {
@@ -46,7 +47,7 @@ export const createSafeProcedure = withAuth
           size: pdfBuffer.byteLength,
         } as unknown as File;
 
-        uploadData = await uploadFile(
+        uploadData = await storeFile(
           file,
           { identifier: "templates", keyPrefix: "new-safes" },
           "privateBucket",

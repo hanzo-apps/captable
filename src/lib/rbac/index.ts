@@ -131,6 +131,19 @@ export class RBAC {
     return this.policy;
   }
 
+  /** Whether permissions grant one action on one subject. */
+  static allows(
+    permissions: TPermission[],
+    subject: TSubjects,
+    action: TActions,
+  ): boolean {
+    return permissions.some(
+      (p) =>
+        p.subject === subject &&
+        (p.actions.includes("*") || p.actions.includes(action)),
+    );
+  }
+
   static normalizePermissionsMap(permissions: TPermission[]) {
     const permissionMap = new Map<TSubjects, TActions[]>();
 

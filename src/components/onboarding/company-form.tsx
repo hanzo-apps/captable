@@ -89,7 +89,11 @@ export const CompanyForm = ({ type, data }: CompanyFormProps) => {
   });
 
   const onBoardingMutation = api.onboarding.onboard.useMutation({
-    onSuccess: async ({ publicId }) => {
+    onSuccess: async ({ success, message, publicId }) => {
+      if (!success || !publicId) {
+        toast.error(message);
+        return;
+      }
       await update();
 
       router.push(`/${publicId}`);

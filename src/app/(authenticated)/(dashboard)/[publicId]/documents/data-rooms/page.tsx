@@ -1,8 +1,10 @@
 import EmptyState from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
+import { serverPermission } from "@/lib/rbac/access-control";
 import { getServerComponentAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { RiAddFill, RiFolderCheckFill } from "@remixicon/react";
+import { notFound } from "next/navigation";
 import { Fragment } from "react";
 import DataRoomPopover from "./components/data-room-popover";
 import Folders from "./components/dataroom-folders";
@@ -32,8 +34,12 @@ const DataRoomPage = async () => {
     return null;
   }
 
-  const { companyId, companyPublicId } = session.user;
-  const dataRooms = await getDataRooms(companyId);
+  const { membership, allowed } = await serverPermission("documents", "read");
+  if (!allowed) {
+    return notFound();
+  }
+  const { companyPublicId } = session.user;
+  const dataRooms = await getDataRooms(membership.companyId);
 
   return (
     <Fragment>

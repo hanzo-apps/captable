@@ -8,6 +8,7 @@ import z from "zod";
 
 export const accessTokenRouter = createTRPCRouter({
   listAll: withAccessControl
+    .meta({ policies: { developer: { allow: ["read"] } } })
     .input(z.object({ typeEnum: z.nativeEnum(AccessTokenType) }))
     .query(async ({ ctx, input }) => {
       const {
@@ -42,6 +43,7 @@ export const accessTokenRouter = createTRPCRouter({
     }),
 
   create: withAccessControl
+    .meta({ policies: { developer: { allow: ["create"] } } })
     .input(z.object({ typeEnum: z.nativeEnum(AccessTokenType) }))
     .mutation(async ({ ctx, input }) => {
       const {
@@ -93,6 +95,7 @@ export const accessTokenRouter = createTRPCRouter({
     }),
 
   delete: withAccessControl
+    .meta({ policies: { developer: { allow: ["delete"] } } })
     .input(z.object({ tokenId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const {

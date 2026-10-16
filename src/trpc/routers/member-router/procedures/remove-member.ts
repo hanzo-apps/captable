@@ -1,14 +1,17 @@
 import { Audit } from "@/server/audit";
-import { checkMembership } from "@/server/auth";
 import type { TPrismaOrTransaction } from "@/server/db";
-import { withAuth, type withAuthTrpcContextType } from "@/trpc/api/trpc";
+import {
+  withAccessControl,
+  type withAccessControlTrpcContextType,
+} from "@/trpc/api/trpc";
 import {
   type TypeZodRemoveMemberMutationSchema,
   ZodRemoveMemberMutationSchema,
 } from "../schema";
 
-export const removeMemberProcedure = withAuth
+export const removeMemberProcedure = withAccessControl
   .input(ZodRemoveMemberMutationSchema)
+  .meta({ policies: { members: { allow: ["delete"] } } })
   .mutation(async (args) => {
     const data = await args.ctx.db.$transaction(async (db) => {
       const data = await removeMemberHandler({
@@ -24,19 +27,18 @@ export const removeMemberProcedure = withAuth
 
 interface removeMemberHandlerOptions {
   input: TypeZodRemoveMemberMutationSchema;
-  ctx: Omit<withAuthTrpcContextType, "db"> & {
+  ctx: Omit<Awaited<withAccessControlTrpcContextType>, "db"> & {
     db: TPrismaOrTransaction;
   };
 }
 
 export async function removeMemberHandler({
-  ctx: { db, session, requestIp, userAgent },
+  ctx: { db, session, requestIp, userAgent, membership },
   input,
 }: removeMemberHandlerOptions) {
   const user = session.user;
   const { memberId } = input;
-
-  const { companyId } = await checkMembership({ session, tx: db });
+  const { companyId } = membership;
 
   const member = await db.member.delete({
     where: {

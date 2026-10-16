@@ -1,9 +1,10 @@
 import { checkMembership } from "@/server/auth";
 import { getPresignedGetUrl } from "@/server/file-uploads";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodGetTemplateQuerySchema } from "../schema";
 
-export const getTemplateProcedure = withAuth
+export const getTemplateProcedure = withAccessControl
+  .meta({ policies: { documents: { allow: ["read"] } } })
   .input(ZodGetTemplateQuerySchema)
   .query(async ({ ctx, input }) => {
     const { template } = await ctx.db.$transaction(async (tx) => {

@@ -1,29 +1,32 @@
-import { encode } from "@/lib/jwt";
-import { withAuth } from "@/trpc/api/trpc";
+import { encodeShare } from "@/lib/jwt";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { z } from "zod";
 
-export const getUpdatesProcedure = withAuth.query(async ({ ctx }) => {
-  const {
-    db,
-    session: { user },
-  } = ctx;
+export const getUpdatesProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["read"] } } })
+  .query(async ({ ctx }) => {
+    const {
+      db,
+      session: { user },
+    } = ctx;
 
-  const data = await db.update.findMany({
-    where: {
-      companyId: user.companyId,
-    },
-    include: {
-      recipients: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    const data = await db.update.findMany({
+      where: {
+        companyId: user.companyId,
+      },
+      include: {
+        recipients: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return { data };
   });
 
-  return { data };
-});
-
-export const getRecipientsProcedure = withAuth
+export const getRecipientsProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["read"] } } })
   .input(z.object({ updateId: z.string() }))
   .query(async ({ ctx, input }) => {
     const {
@@ -46,7 +49,7 @@ export const getRecipientsProcedure = withAuth
     const recipients = await Promise.all(
       data.map(async (recipient) => ({
         ...recipient,
-        token: await encode({
+        token: await encodeShare({
           updateId,
           companyId,
           recipientId: recipient.id,

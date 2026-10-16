@@ -1,8 +1,11 @@
 import { sendMemberInviteEmailJob } from "@/jobs/member-inivite-email";
+import { generateMemberIdentifier } from "@/lib/invite";
 import { getRoleById } from "@/lib/rbac/access-control";
-import { generatePasswordResetToken } from "@/lib/token";
 import { Audit } from "@/server/audit";
-import { generateInviteToken, generateMemberIdentifier } from "@/server/member";
+import {
+  generateInviteToken,
+  revokeExistingInviteTokens,
+} from "@/server/member";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { ZodInviteMemberMutationSchema } from "../schema";
@@ -17,16 +20,11 @@ export const inviteMemberProcedure = withAccessControl
   .mutation(async ({ ctx, input }) => {
     const user = ctx.session.user;
     const { name, email, title, roleId } = input;
-    const {
-      userAgent,
-      requestIp,
-      membership: { companyId },
-    } = ctx;
+    const { userAgent, requestIp, membership } = ctx;
+    const { companyId } = membership;
 
     const { expires, memberInviteTokenHash } = await generateInviteToken();
-
-    const { token: passwordResetToken } =
-      await generatePasswordResetToken(email);
+    const address = email.trim().toLowerCase();
 
     const { company, verificationToken } = await ctx.db.$transaction(
       async (tx) => {
@@ -40,33 +38,33 @@ export const inviteMemberProcedure = withAccessControl
           },
         });
 
-        // create or find user
-        const invitedUser = await tx.user.upsert({
+        // An invitation seats a person who already signs in here only when IAM
+        // has proven this address is theirs. Any other address is seated by a
+        // placeholder — no sign-in, no address, no password — that whoever IAM
+        // proves the address to takes over on accepting (inviteSeat). Seating a
+        // row by its address alone would hand the seat to whoever registered
+        // that address first.
+        const known = await tx.user.findFirst({
           where: {
-            email,
+            email: address,
+            emailVerified: { not: null },
+            accounts: { some: {} },
           },
-          update: {},
-          create: {
-            name,
-            email,
-          },
-          select: {
-            id: true,
-          },
+          select: { id: true },
         });
 
-        // check if user is already a member
-        const prevMember = await tx.member.findUnique({
-          where: {
-            companyId_userId: {
-              companyId,
-              userId: invitedUser.id,
-            },
-          },
-        });
+        const prevMember = known
+          ? await tx.member.findUnique({
+              where: {
+                companyId_userId: { companyId, userId: known.id },
+              },
+            })
+          : await tx.member.findFirst({
+              where: { companyId, status: "PENDING", workEmail: address },
+            });
 
         // if already a member, throw error
-        if (prevMember && prevMember.status === "ACTIVE") {
+        if (prevMember && prevMember.status !== "PENDING") {
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "user already a member",
@@ -74,6 +72,24 @@ export const inviteMemberProcedure = withAccessControl
         }
 
         const role = await getRoleById({ id: roleId, tx });
+        // A role grants what its holder could already grant, so only an ADMIN
+        // makes another ADMIN.
+        if (role.role === "ADMIN" && membership.role !== "ADMIN") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Only an admin can make another member an admin.",
+          });
+        }
+
+        const seatHolder =
+          prevMember?.userId ??
+          known?.id ??
+          (
+            await tx.user.create({
+              data: { name },
+              select: { id: true },
+            })
+          ).id;
 
         //  create member
         const member = await tx.member.upsert({
@@ -82,8 +98,9 @@ export const inviteMemberProcedure = withAccessControl
             isOnboarded: false,
             lastAccessed: new Date(),
             companyId,
-            userId: invitedUser.id,
+            userId: seatHolder,
             status: "PENDING",
+            workEmail: address,
             ...role,
           },
           update: {
@@ -91,12 +108,13 @@ export const inviteMemberProcedure = withAccessControl
             isOnboarded: false,
             lastAccessed: new Date(),
             status: "PENDING",
+            workEmail: address,
             ...role,
           },
           where: {
             companyId_userId: {
               companyId,
-              userId: invitedUser.id,
+              userId: seatHolder,
             },
           },
           select: {
@@ -110,11 +128,13 @@ export const inviteMemberProcedure = withAccessControl
           },
         });
 
+        await revokeExistingInviteTokens({ memberId: member.id, tx });
+
         // custom verification token for member invitation
         const { token: verificationToken } = await tx.verificationToken.create({
           data: {
             identifier: generateMemberIdentifier({
-              email,
+              email: address,
               memberId: member.id,
             }),
             token: memberInviteTokenHash,
@@ -143,8 +163,7 @@ export const inviteMemberProcedure = withAccessControl
 
     await sendMemberInviteEmailJob.emit({
       verificationToken,
-      passwordResetToken,
-      email,
+      email: address,
       company,
       user: {
         email: user.email,

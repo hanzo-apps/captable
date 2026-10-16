@@ -26,7 +26,11 @@ export const getMany = withAuthApiV1
     const { membership } = c.get("session");
 
     const userMemberships = await db.member.findMany({
-      where: { userId: membership.userId },
+      where: {
+        userId: membership.userId,
+        status: "ACTIVE",
+        isOnboarded: true,
+      },
       select: { companyId: true },
     });
 

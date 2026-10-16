@@ -122,7 +122,7 @@ export const columns: ColumnDef<Member[number]>[] = [
 
         <div className=" ml-2">
           <p>{row.original?.user?.name}</p>
-          <p>{row.original?.user?.email}</p>
+          <p>{row.original?.user?.email ?? row.original?.workEmail}</p>
         </div>
       </div>
     ),
@@ -175,7 +175,6 @@ export const columns: ColumnDef<Member[number]>[] = [
 
       const status = member.status;
       const memberId = member.id;
-      const email = member?.user?.email;
 
       const isActive = status === "ACTIVE";
       const isPending = status === "PENDING";
@@ -184,8 +183,8 @@ export const columns: ColumnDef<Member[number]>[] = [
 
       const handleRevokeOrRemove = async () => {
         try {
-          if (isPending && email) {
-            await revokeInvite.mutateAsync({ email, memberId });
+          if (isPending) {
+            await revokeInvite.mutateAsync({ memberId });
           } else {
             await removeMember.mutateAsync({ memberId });
           }

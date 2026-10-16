@@ -2,10 +2,11 @@ import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodAddOptionMutationSchema } from "../schema";
 
-export const addOptionProcedure = withAuth
+export const addOptionProcedure = withAccessControl
+  .meta({ policies: { securities: { allow: ["create"] } } })
   .input(ZodAddOptionMutationSchema)
   .mutation(async ({ ctx, input }) => {
     const { userAgent, requestIp, captable, db, session } = ctx;

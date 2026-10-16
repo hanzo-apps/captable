@@ -1,9 +1,10 @@
 import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { UpdateMutationSchema } from "../schema";
 
-export const cloneUpdateProcedure = withAuth
+export const cloneUpdateProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["create"] } } })
   .input(UpdateMutationSchema)
   .mutation(async ({ ctx, input }) => {
     try {

@@ -1,6 +1,9 @@
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
-import { withAuth, type withAuthTrpcContextType } from "@/trpc/api/trpc";
+import {
+  withAccessControl,
+  type withAuthTrpcContextType,
+} from "@/trpc/api/trpc";
 import {
   DocumentShareMutationSchema,
   type TypeDocumentShareMutation,
@@ -56,8 +59,7 @@ export const createDocumentShareHandler = async ({
   }
 };
 
-export const createDocumentShareProcedure = withAuth
+export const createDocumentShareProcedure = withAccessControl
+  .meta({ policies: { documents: { allow: ["create"] } } })
   .input(DocumentShareMutationSchema)
-  .mutation(async (opts) => {
-    return createDocumentShareHandler(opts);
-  });
+  .mutation((opts) => createDocumentShareHandler(opts));

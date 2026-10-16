@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/prefer-for-of */
 import { dayjsExt } from "@/common/dayjs";
-import { type TUploadFile, getFileFromS3, uploadFile } from "@/common/uploads";
+import type { TUploadFile } from "@/common/put-file";
 import { TAG } from "@/lib/tags";
 import { AuditLogTemplate } from "@/pdf-templates/audit-log-template";
+import { getFileFromS3, storeFile } from "@/server/file-uploads";
 import { createBucketHandler } from "@/trpc/routers/bucket-router/procedures/create-bucket";
 import { createDocumentHandler } from "@/trpc/routers/document-router/procedures/create-document";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -215,7 +216,7 @@ export async function uploadEsignDocuments({
     size: 0,
   } as unknown as File;
 
-  const data = await uploadFile(file, {
+  const data = await storeFile(file, {
     identifier: companyId,
     keyPrefix: "signed-esign-doc",
   });

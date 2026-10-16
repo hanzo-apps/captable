@@ -20,6 +20,13 @@ const IAM_URL = process.env.IAM_URL;
 const IAM_CLIENT_ID = process.env.IAM_CLIENT_ID;
 const IAM_CLIENT_SECRET = process.env.IAM_CLIENT_SECRET;
 
+/**
+ * The IAM sign-in. An account here is the IAM subject it signed in as and
+ * nothing else: next-auth finds it by (provider, providerAccountId = sub), and a
+ * first sign-in whose address already names a user without that subject is
+ * refused (OAuthAccountNotLinked) rather than merged into it. An address is a
+ * label a person can be given, not proof they are the person it was given to.
+ */
 // biome-ignore lint/suspicious/noExplicitAny: IAM profile shape varies
 function HanzoIAMProvider(): OAuthConfig<any> {
   const issuer = IAM_URL || "https://hanzo.id";
@@ -40,18 +47,44 @@ function HanzoIAMProvider(): OAuthConfig<any> {
     // sign-in failed; the handoff to hanzo.id looks perfectly healthy either
     // way, so only completing a login tells the two apart.
     idToken: true,
-    userinfo: { url: `${issuer}/v1/iam/oauth/userinfo` },
+    // The profile is IAM's userinfo, not the id_token's claims: only userinfo
+    // states whether IAM has proven the address (`email_verified`), and an
+    // invitation is accepted only by an address IAM has proven. next-auth hands
+    // this the TokenSet its OIDC callback validated (typed as its parameters),
+    // and given a TokenSet openid-client refuses a userinfo whose subject is
+    // not the id_token's.
+    userinfo: {
+      url: `${issuer}/v1/iam/oauth/userinfo`,
+      request: ({ client, tokens }) =>
+        client.userinfo(tokens as Parameters<typeof client.userinfo>[0]),
+    },
     profile(profile) {
       return {
         id: profile.sub,
         name: profile.displayName || profile.name || profile.preferred_username,
         email: profile.email,
         image: profile.avatar || profile.picture,
+        emailVerified: profile.email_verified === true ? new Date() : null,
       };
     },
-    allowDangerousEmailAccountLinking: true,
   };
 }
+
+/**
+ * Records on the user row whether IAM has proven its address, as IAM answers on
+ * this sign-in. next-auth creates a user with `emailVerified: null` whatever the
+ * profile says, so the answer is written here, on every sign-in, and a proof IAM
+ * withdraws stops counting at the next one.
+ */
+const recordEmailProof = async (
+  userId: string,
+  profile: { emailVerified?: Date | null } | undefined,
+) => {
+  await db.user.update({
+    where: { id: userId },
+    data: { emailVerified: profile?.emailVerified ?? null },
+  });
+};
 
 export const JWT_SECRET = new TextEncoder().encode(env.NEXTAUTH_SECRET);
 
@@ -88,11 +121,11 @@ declare module "next-auth/jwt" {
 
 export const authOptions: NextAuthOptions = {
   events: {
-    async linkAccount({ user }) {
-      await db.user.update({
-        where: { id: user.id },
-        data: { emailVerified: new Date() },
-      });
+    async signIn({ user, profile }) {
+      await recordEmailProof(
+        user.id,
+        profile as { emailVerified?: Date | null } | undefined,
+      );
     },
   },
   callbacks: {
@@ -186,7 +219,7 @@ export const authOptions: NextAuthOptions = {
   },
   // @ts-expect-error
   adapter: PrismaAdapter(db),
-  secret: env.NEXTAUTH_SECRET ?? "secret",
+  secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },
@@ -267,11 +300,15 @@ export interface checkMembershipOptions {
 }
 
 export async function checkMembership({ session, tx }: checkMembershipOptions) {
+  // ACTIVE is read from the row, not from the session: the session carries the
+  // member id it signed in with, and a member an admin has since deactivated or
+  // removed must stop acting now rather than when the cookie lapses.
   const data = await tx.member.findFirst({
     where: {
       id: session.user.memberId,
       companyId: session.user.companyId,
       isOnboarded: true,
+      status: "ACTIVE",
     },
     select: {
       id: true,

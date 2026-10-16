@@ -1,8 +1,9 @@
 import { checkMembership } from "@/server/auth";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodCancelTemplateMutationSchema } from "../schema";
 
-export const cancelTemplateProcedure = withAuth
+export const cancelTemplateProcedure = withAccessControl
+  .meta({ policies: { documents: { allow: ["update"] } } })
   .input(ZodCancelTemplateMutationSchema)
   .mutation(async ({ input, ctx }) => {
     const { templateId, publicId } = input;

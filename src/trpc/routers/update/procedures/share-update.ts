@@ -1,14 +1,15 @@
 import { env } from "@/env";
 import { shareUpdateEmailJob } from "@/jobs/share-update-email";
-import { encode } from "@/lib/jwt";
+import { encodeShare } from "@/lib/jwt";
 import { UpdateStatusEnum } from "@/prisma/enums";
 import { ShareRecipientSchema } from "@/schema/contacts";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { z } from "zod";
 
-export const shareUpdateProcedure = withAuth
+export const shareUpdateProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["update"] } } })
   .input(
     z.object({
       updateId: z.string(),
@@ -76,7 +77,7 @@ export const shareUpdateProcedure = withAuth
           },
         });
 
-        const token = await encode({
+        const token = await encodeShare({
           companyId,
           updateId,
           publicId: update.publicId,
@@ -133,7 +134,8 @@ export const shareUpdateProcedure = withAuth
     };
   });
 
-export const unshareUpdateProcedure = withAuth
+export const unshareUpdateProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["update"] } } })
   .input(
     z.object({
       updateId: z.string(),

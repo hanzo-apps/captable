@@ -45,8 +45,15 @@ export const getOne = withAuthApiV1
     const { membership } = c.get("session");
     const { id: companyId } = c.req.valid("param");
 
+    // The caller's own active membership of this company, found by the user
+    // the credential belongs to: a bearer token carries no member id.
     const member = await db.member.findFirst({
-      where: { companyId, id: membership.memberId },
+      where: {
+        companyId,
+        userId: membership.userId,
+        status: "ACTIVE",
+        isOnboarded: true,
+      },
       select: { companyId: true },
     });
 

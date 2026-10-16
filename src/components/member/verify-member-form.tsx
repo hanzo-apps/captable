@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import {
   Form,
   FormControl,
@@ -22,11 +23,10 @@ import {
 } from "../ui/form";
 
 interface VerifyMemberFormProps {
-  memberId: string;
   token: string;
 }
 
-export function VerifyMemberForm({ memberId, token }: VerifyMemberFormProps) {
+export function VerifyMemberForm({ token }: VerifyMemberFormProps) {
   const { update } = useSession();
   const router = useRouter();
   const acceptMember = api.member.acceptMember.useMutation({
@@ -34,18 +34,20 @@ export function VerifyMemberForm({ memberId, token }: VerifyMemberFormProps) {
       await update();
       router.push(`/${publicId}`);
     },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
   const form = useForm<TypeZodAcceptMemberMutationSchema>({
     resolver: zodResolver(ZodAcceptMemberMutationSchema),
     defaultValues: {
       name: "",
-      memberId,
       token,
       workEmail: "",
     },
   });
 
-  async function onSubmit(values: TypeZodAcceptMemberMutationSchema) {
+  function onSubmit(values: TypeZodAcceptMemberMutationSchema) {
     acceptMember.mutate(values);
   }
 
@@ -54,9 +56,7 @@ export function VerifyMemberForm({ memberId, token }: VerifyMemberFormProps) {
     <div className="flex min-h-screen w-full items-center justify-center">
       <div className="flex flex-col gap-y-4">
         <div className="flex flex-col gap-y-2 text-center">
-          <h1 className="text-3xl font-semibold">
-            Welcome! 👋
-          </h1>
+          <h1 className="text-3xl font-semibold">Welcome! 👋</h1>
           <p className="text-muted-foreground">
             Enter your information to complete onboarding
           </p>

@@ -1,8 +1,9 @@
 import { documentsBySecurity } from "@/server/captable-documents";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 
-export const getSharesProcedure = withAuth.query(
-  async ({ ctx: { db, captable } }) => {
+export const getSharesProcedure = withAccessControl
+  .meta({ policies: { securities: { allow: ["read"] } } })
+  .query(async ({ ctx: { db, captable } }) => {
     const shares = await captable.shares.list();
     const documents = await documentsBySecurity(
       db,
@@ -21,5 +22,4 @@ export const getSharesProcedure = withAuth.query(
     );
 
     return { data };
-  },
-);
+  });

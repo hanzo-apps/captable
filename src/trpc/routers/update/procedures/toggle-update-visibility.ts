@@ -1,11 +1,12 @@
 import { UpdateStatusEnum } from "@/prisma/enums";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-export const toggleUpdateVisibilityProcedure = withAuth
+export const toggleUpdateVisibilityProcedure = withAccessControl
+  .meta({ policies: { updates: { allow: ["update"] } } })
   .input(z.object({ updateId: z.string() }))
   .mutation(async ({ ctx: { db, session, requestIp, userAgent }, input }) => {
     try {

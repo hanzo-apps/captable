@@ -8,22 +8,16 @@ type Fields = RouterOutputs["template"]["getSigningFields"]["fields"];
 interface SigningFieldsProps {
   fields: Fields;
   companyPublicId: string | undefined;
-  recipientId: string;
-  templateId: string;
+  token: string;
 }
 
 export function SigningFields({
   fields,
   companyPublicId,
-  recipientId,
-  templateId,
+  token,
 }: SigningFieldsProps) {
   return (
-    <SigningFieldForm
-      recipientId={recipientId}
-      templateId={templateId}
-      companyPublicId={companyPublicId}
-    >
+    <SigningFieldForm token={token} companyPublicId={companyPublicId}>
       {fields.map((item) => (
         <FieldRenderer
           name={item.name}

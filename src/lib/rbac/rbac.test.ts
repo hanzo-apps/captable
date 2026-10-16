@@ -73,3 +73,51 @@ describe("evaluating a query", () => {
     });
   }
 });
+
+describe("RBAC.allows", () => {
+  test("grants an action a role lists, or every action for *", () => {
+    expect(
+      RBAC.allows(
+        [{ subject: "securities", actions: ["read"] }],
+        "securities",
+        "read",
+      ),
+    ).toBe(true);
+    expect(
+      RBAC.allows(
+        [{ subject: "securities", actions: ["*"] }],
+        "securities",
+        "delete",
+      ),
+    ).toBe(true);
+  });
+
+  test("refuses an action a role does not list", () => {
+    expect(
+      RBAC.allows(
+        [{ subject: "securities", actions: ["read"] }],
+        "securities",
+        "update",
+      ),
+    ).toBe(false);
+  });
+
+  test("refuses a subject a role was saved without", () => {
+    expect(
+      RBAC.allows(
+        [{ subject: "stakeholder", actions: ["*"] }],
+        "securities",
+        "read",
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("a role saved before a subject existed", () => {
+  test("is refused on that subject by enforce", () => {
+    const { val } = new RBAC()
+      .addPolicies({ securities: { allow: ["read"] } })
+      .enforce([{ subject: "stakeholder", actions: ["*"] }]);
+    expect(val?.valid).toBe(false);
+  });
+});

@@ -2,7 +2,7 @@ import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import type { PrismaTransactionalClient } from "@/server/db";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import {
   type TypeZodCreateTemplateMutationSchema,
   ZodCreateTemplateMutationSchema,
@@ -69,7 +69,8 @@ export async function createTemplateHandler({
   return template;
 }
 
-export const createTemplateProcedure = withAuth
+export const createTemplateProcedure = withAccessControl
+  .meta({ policies: { documents: { allow: ["create"] } } })
   .input(ZodCreateTemplateMutationSchema)
   .mutation(async ({ ctx, input }) => {
     const { requestIp, userAgent, session } = ctx;

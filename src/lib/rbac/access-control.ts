@@ -163,6 +163,19 @@ export const getServerPermissions = cache(async () => {
   return val;
 });
 
+/**
+ * The signed-in member's active membership and whether their role grants one
+ * action on one subject — for a server page that reads the database itself
+ * rather than through a procedure.
+ */
+export const serverPermission = async (
+  subject: TSubjects,
+  action: TActions,
+) => {
+  const { permissions, membership } = await getServerPermissions();
+  return { membership, allowed: RBAC.allows(permissions, subject, action) };
+};
+
 export const serverAccessControl = async () => {
   const { permissions } = await getServerPermissions();
 

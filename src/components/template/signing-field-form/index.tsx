@@ -10,15 +10,14 @@ import { toast } from "sonner";
 interface SigningFieldFormProps extends ComponentProps<"form"> {
   companyPublicId?: string;
   children: ReactNode;
-  recipientId: string;
-  templateId: string;
+  /** The signing link's token: the only thing that says who is signing. */
+  token: string;
 }
 
 export function SigningFieldForm({
   companyPublicId,
   children,
-  recipientId,
-  templateId,
+  token,
   ...rest
 }: SigningFieldFormProps) {
   const { handleSubmit } = useFormContext<TemplateSigningFieldForm>();
@@ -39,8 +38,7 @@ export function SigningFieldForm({
   const onSubmit = async (values: TemplateSigningFieldForm) => {
     await mutateAsync({
       data: values.fieldValues,
-      recipientId,
-      templateId,
+      token,
     });
   };
 

@@ -9,7 +9,9 @@ export const updateProfileProcedure = withAuth
     const user = session.user;
 
     if (input.type === PayloadType.PROFILE_DATA) {
-      const { fullName, loginEmail, workEmail, jobTitle } = input.payload;
+      // The sign-in address is IAM's — it is what an invitation is matched
+      // against — so a profile edit never changes it.
+      const { fullName, workEmail, jobTitle } = input.payload;
 
       await db.$transaction(async (tx) => {
         const member = await tx.member.update({
@@ -24,7 +26,6 @@ export const updateProfileProcedure = withAuth
             user: {
               update: {
                 name: fullName,
-                email: loginEmail,
               },
             },
           },

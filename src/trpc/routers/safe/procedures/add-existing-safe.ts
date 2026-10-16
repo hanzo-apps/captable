@@ -2,11 +2,12 @@ import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodAddExistingSafeMutationSchema } from "../schema";
 import { safeBody } from "../wire";
 
-export const addExistingSafeProcedure = withAuth
+export const addExistingSafeProcedure = withAccessControl
+  .meta({ policies: { securities: { allow: ["create"] } } })
   .input(ZodAddExistingSafeMutationSchema)
   .mutation(async ({ ctx, input }) => {
     const { userAgent, requestIp, captable, db, session } = ctx;

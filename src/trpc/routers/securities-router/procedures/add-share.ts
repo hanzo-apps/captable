@@ -2,10 +2,11 @@ import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodAddShareMutationSchema } from "../schema";
 
-export const addShareProcedure = withAuth
+export const addShareProcedure = withAccessControl
+  .meta({ policies: { securities: { allow: ["create"] } } })
   .input(ZodAddShareMutationSchema)
   .mutation(async ({ ctx, input }) => {
     const { userAgent, requestIp, captable, db, session } = ctx;

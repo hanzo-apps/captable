@@ -1,10 +1,11 @@
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
 import { captableFailure } from "@/server/captable-api";
-import { withAuth } from "@/trpc/api/trpc";
+import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodDeleteSafesMutationSchema } from "../schema";
 
-export const deleteSafeProcedure = withAuth
+export const deleteSafeProcedure = withAccessControl
+  .meta({ policies: { securities: { allow: ["delete"] } } })
   .input(ZodDeleteSafesMutationSchema)
   .mutation(
     async ({ ctx: { db, captable, session, requestIp, userAgent }, input }) => {

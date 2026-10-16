@@ -5,7 +5,7 @@ interface LoginFormHeaderProps {
   page?: string;
 }
 
-export function AuthFormHeader({ page }: LoginFormHeaderProps) {
+export function AuthFormHeader(_props: LoginFormHeaderProps) {
   return (
     <div className="flex flex-col gap-y-2 text-center">
       <div className="flex justify-center">
@@ -13,9 +13,7 @@ export function AuthFormHeader({ page }: LoginFormHeaderProps) {
       </div>
 
       <h1 className="mb-2 text-2xl font-semibold tracking-tight">
-        {page === "signup"
-          ? `Signup to ${APP_NAME}`
-          : `Login to ${APP_NAME}`}
+        Login to {APP_NAME}
       </h1>
     </div>
   );

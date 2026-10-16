@@ -3,7 +3,7 @@
 import { dayjsExt } from "@/common/dayjs";
 import FileIcon from "@/components/common/file-icon";
 import { Card } from "@/components/ui/card";
-import { getPresignedGetUrl } from "@/server/file-uploads";
+import { presignDownload } from "@/server/storage";
 import { RiMore2Fill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
 
@@ -35,7 +35,7 @@ type DocumentTableProps = {
 const DocumentsTable = ({ documents, companyPublicId }: DocumentTableProps) => {
   const router = useRouter();
   const openFileOnTab = async (key: string) => {
-    const fileUrl = await getPresignedGetUrl(key);
+    const fileUrl = await presignDownload(key);
     window.open(fileUrl.url, "_blank");
   };
 

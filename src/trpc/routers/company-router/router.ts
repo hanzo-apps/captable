@@ -1,5 +1,4 @@
 import { Audit } from "@/server/audit";
-import { checkMembership } from "@/server/auth";
 import { createTRPCRouter, withAccessControl, withAuth } from "@/trpc/api/trpc";
 import { ZodOnboardingMutationSchema } from "../onboarding-router/schema";
 import { ZodSwitchCompanyMutationSchema } from "./schema";
@@ -9,49 +8,55 @@ export const companyRouter = createTRPCRouter({
   // three incorporation fields, while this read also feeds the settings form the
   // member's title and the company's logo, website, address, city, state,
   // zipcode, country and incorporationDate. Moving it needs those on that route.
-  getCompany: withAuth.query(async ({ ctx }) => {
-    const user = ctx.session.user;
-    const companyId = user.companyId;
+  // Any active member reads the company it belongs to; the membership check is
+  // withAccessControl's, which reads ACTIVE from the row.
+  getCompany: withAccessControl
+    .meta({ policies: {} })
+    .query(async ({ ctx }) => {
+      const { memberId, companyId } = ctx.membership;
 
-    const company = await ctx.db.member.findFirstOrThrow({
-      where: {
-        id: user.memberId,
-        companyId,
-      },
-      select: {
-        id: true,
-        title: true,
-        company: {
-          select: {
-            id: true,
-            publicId: true,
-            name: true,
-            website: true,
-            incorporationDate: true,
-            incorporationType: true,
-            incorporationState: true,
-            incorporationCountry: true,
-            state: true,
-            city: true,
-            zipcode: true,
-            streetAddress: true,
-            country: true,
-            logo: true,
+      const company = await ctx.db.member.findFirstOrThrow({
+        where: {
+          id: memberId,
+          companyId,
+        },
+        select: {
+          id: true,
+          title: true,
+          company: {
+            select: {
+              id: true,
+              publicId: true,
+              name: true,
+              website: true,
+              incorporationDate: true,
+              incorporationType: true,
+              incorporationState: true,
+              incorporationCountry: true,
+              state: true,
+              city: true,
+              zipcode: true,
+              streetAddress: true,
+              country: true,
+              logo: true,
+            },
           },
         },
-      },
-    });
-    return company;
-  }),
+      });
+      return company;
+    }),
   switchCompany: withAuth
     .input(ZodSwitchCompanyMutationSchema)
     .mutation(async ({ ctx, input }) => {
       const { db } = ctx;
 
       await db.$transaction(async (tx) => {
+        // Only one of the caller's own active memberships can be switched to.
         const member = await tx.member.findFirst({
           where: {
             id: input.id,
+            userId: ctx.session.user.id,
+            status: "ACTIVE",
             isOnboarded: true,
           },
         });
