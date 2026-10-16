@@ -6,6 +6,9 @@ import { createTRPCRouter, withAccessControl } from "@/trpc/api/trpc";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 
+/** How long an API access token lives. */
+const ACCESS_TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
 export const accessTokenRouter = createTRPCRouter({
   listAll: withAccessControl
     .meta({ policies: { developer: { allow: ["read"] } } })
@@ -69,6 +72,8 @@ export const accessTokenRouter = createTRPCRouter({
           typeEnum,
           clientId,
           clientSecret: hashedClientSecret,
+          // A token stops working after ninety days; a new one is made here.
+          expiresAt: new Date(Date.now() + ACCESS_TOKEN_TTL_MS),
         },
       });
 

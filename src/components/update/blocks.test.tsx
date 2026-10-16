@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { Blocks, safeUrl } from "./blocks";
+import { safeUrl } from "../../lib/update-blocks";
+import { Blocks } from "./blocks";
 
 const html = (blocks: unknown) =>
   renderToStaticMarkup(<Blocks blocks={blocks} />);

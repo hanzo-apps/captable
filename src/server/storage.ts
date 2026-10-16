@@ -8,10 +8,10 @@
 
 import { uploadRefusal } from "@/lib/upload-policy";
 import { checkMembership, getServerAuthSession } from "@/server/auth";
+import { companyObjectUrl } from "@/server/bucket";
 import { companyStands } from "@/server/company";
 import { db } from "@/server/db";
 import {
-  getPresignedGetUrl,
   getPresignedPutUrl,
   type getPresignedUrlOptions,
 } from "@/server/file-uploads";
@@ -85,8 +85,8 @@ export async function presignUpload(request: UploadRequest) {
 
 /**
  * A presigned GET, for an object that is one of the caller's company's
- * documents or e-sign templates. Ownership is read from the rows that file the
- * object, not from the shape of its key.
+ * documents: a Document row of the company points at it, and its key is filed
+ * under the company's own prefixes (companyObjectUrl).
  */
 export async function presignDownload(key: string) {
   const session = await signedIn();
@@ -94,17 +94,11 @@ export async function presignDownload(key: string) {
   if (!membership || !key) throw refused();
 
   const { companyId } = membership;
-  const [document, template] = await Promise.all([
-    db.document.findFirst({
-      where: { companyId, bucket: { key } },
-      select: { id: true },
-    }),
-    db.template.findFirst({
-      where: { companyId, bucket: { key } },
-      select: { id: true },
-    }),
-  ]);
-  if (!document && !template) throw refused();
+  const document = await db.document.findFirst({
+    where: { companyId, bucket: { key } },
+    select: { id: true },
+  });
+  if (!document) throw refused();
 
-  return getPresignedGetUrl(key);
+  return companyObjectUrl(db, companyId, key);
 }

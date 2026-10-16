@@ -133,7 +133,15 @@ function findAccessToken(clientId: string, c: Context) {
       clientId,
       typeEnum: "api",
       active: true,
-      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      // A token made before tokens carried an expiry lives ninety days from
+      // when it was made, as every token made since does.
+      OR: [
+        { expiresAt: { gt: new Date() } },
+        {
+          expiresAt: null,
+          createdAt: { gt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
+        },
+      ],
     },
     select: {
       clientId: true,

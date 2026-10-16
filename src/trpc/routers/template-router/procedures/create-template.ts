@@ -1,6 +1,7 @@
 import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
+import { assertCompanyBuckets } from "@/server/bucket";
 import type { PrismaTransactionalClient } from "@/server/db";
 import { withAccessControl } from "@/trpc/api/trpc";
 import {
@@ -86,6 +87,7 @@ export const createTemplateProcedure = withAccessControl
         tx,
         session: ctx.session,
       });
+      await assertCompanyBuckets(tx, companyId, [input.bucketId]);
 
       return await createTemplateHandler({
         input: {

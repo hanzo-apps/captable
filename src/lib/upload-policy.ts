@@ -41,11 +41,15 @@ export const uploadRefusal = ({
 };
 
 /**
- * Whether an object key was minted for this company: every key a member's
- * upload is signed for starts with the company's public id (the store signs
- * that prefix itself), so a key under any other prefix is another owner's.
+ * Whether an object key is filed under one of a company's own prefixes. Every
+ * upload a member's browser makes is signed under the company's public id, and
+ * every object the server writes for it under that or the company's id, so a
+ * key under any other prefix is another owner's.
  */
-export const companyOwnsKey = (key: string, companyPublicId: string) =>
-  !!companyPublicId &&
-  key.startsWith(`${companyPublicId}/`) &&
-  !key.split("/").includes("..");
+export const companyOwnsKey = (
+  key: string,
+  prefixes: string | readonly string[],
+) =>
+  (typeof prefixes === "string" ? [prefixes] : prefixes).some(
+    (prefix) => !!prefix && key.startsWith(`${prefix}/`),
+  ) && !key.split("/").includes("..");

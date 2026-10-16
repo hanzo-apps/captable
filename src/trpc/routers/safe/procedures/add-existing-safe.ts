@@ -1,6 +1,7 @@
 import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
+import { assertCompanyBuckets } from "@/server/bucket";
 import { captableFailure } from "@/server/captable-api";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodAddExistingSafeMutationSchema } from "../schema";
@@ -13,6 +14,14 @@ export const addExistingSafeProcedure = withAccessControl
     const { userAgent, requestIp, captable, db, session } = ctx;
     const user = session.user;
     const { documents, ...rest } = input;
+
+    // The documents are checked before the security lands upstream, so a
+    // refusal leaves nothing behind there.
+    await assertCompanyBuckets(
+      db,
+      ctx.membership.companyId,
+      input.documents.map((doc) => doc.bucketId),
+    );
 
     try {
       const publicId = generatePublicId();

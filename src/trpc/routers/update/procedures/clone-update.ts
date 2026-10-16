@@ -1,4 +1,5 @@
 import { generatePublicId } from "@/common/id";
+import { cleanBlocks } from "@/lib/update-blocks";
 import { Audit } from "@/server/audit";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { UpdateMutationSchema } from "../schema";
@@ -14,7 +15,9 @@ export const cloneUpdateProcedure = withAccessControl
       const userName = ctx.session.user.name;
       const { userAgent, requestIp } = ctx;
       const publicId = generatePublicId();
-      const { title, content } = input;
+      const { title } = input;
+      // Every link and media address is made safe before the update is stored.
+      const content = cleanBlocks(input.content);
 
       if (title.length === 0 || content.length === 0) {
         return {

@@ -41,5 +41,16 @@ describe("companyOwnsKey", () => {
     expect(companyOwnsKey("abc1234/x.pdf", "abc123")).toBe(false);
     expect(companyOwnsKey("abc123/../other/x.pdf", "abc123")).toBe(false);
     expect(companyOwnsKey("abc123/x.pdf", "")).toBe(false);
+    expect(companyOwnsKey("abc123/x.pdf", [])).toBe(false);
+  });
+
+  it("is a key under any of the company's prefixes", () => {
+    const company = ["abc123", "clxwbok58"];
+    expect(companyOwnsKey("clxwbok58/signed-esign-doc-x.pdf", company)).toBe(
+      true,
+    );
+    expect(companyOwnsKey("abc123/shares-docs-x.pdf", company)).toBe(true);
+    expect(companyOwnsKey("templates/new-safes-x.pdf", company)).toBe(false);
+    expect(companyOwnsKey("other/x.pdf", company)).toBe(false);
   });
 });

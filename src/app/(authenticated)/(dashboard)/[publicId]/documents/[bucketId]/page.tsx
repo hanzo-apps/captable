@@ -3,8 +3,8 @@ import FilePreview from "@/components/file/preview";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { serverPermission } from "@/lib/rbac/access-control";
+import { companyObjectUrl } from "@/server/bucket";
 import { db } from "@/server/db";
-import { getPresignedGetUrl } from "@/server/file-uploads";
 import { RiArrowLeftSLine } from "@remixicon/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -34,7 +34,7 @@ const DocumentPreview = async ({
   }
 
   const file = document.bucket;
-  const remoteFile = await getPresignedGetUrl(file.key);
+  const remoteFile = await companyObjectUrl(db, companyId, file.key);
 
   return (
     <Fragment>

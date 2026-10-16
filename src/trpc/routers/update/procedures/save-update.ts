@@ -1,5 +1,6 @@
 import { generatePublicId } from "@/common/id";
 import { RBAC } from "@/lib/rbac";
+import { cleanBlocks } from "@/lib/update-blocks";
 import { Audit } from "@/server/audit";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { UpdateMutationSchema } from "../schema";
@@ -15,7 +16,9 @@ export const saveUpdateProcedure = withAccessControl
       const userName = ctx.session.user.name;
       const { userAgent, requestIp } = ctx;
       const publicId = input.publicId ?? generatePublicId();
-      const { title, content } = input;
+      const { title } = input;
+      // Every link and media address is made safe before the update is stored.
+      const content = cleanBlocks(input.content);
 
       const action = input.publicId ? "update" : "create";
       if (!RBAC.allows(ctx.permissions, "updates", action)) {

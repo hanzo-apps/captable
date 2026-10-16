@@ -5,6 +5,7 @@
 // know is dropped, never passed through.
 
 import { Fragment, type ReactNode, createElement } from "react";
+import { LINK_SCHEMES, MEDIA_SCHEMES, safeUrl } from "../../lib/update-blocks";
 
 type Json = unknown;
 
@@ -16,21 +17,6 @@ const record = (v: Json): Record<string, Json> =>
 const list = (v: Json): Json[] => (Array.isArray(v) ? v : []);
 
 const text = (v: Json): string => (typeof v === "string" ? v : "");
-
-/** An address a link or an image may keep, or "" when it may keep none. */
-export const safeUrl = (raw: Json, schemes: readonly string[]): string => {
-  const value = text(raw).trim();
-  if (!value) return "";
-  try {
-    const url = new URL(value);
-    return schemes.includes(url.protocol) ? url.href : "";
-  } catch {
-    return "";
-  }
-};
-
-const LINK_SCHEMES = ["http:", "https:", "mailto:"] as const;
-const IMAGE_SCHEMES = ["http:", "https:"] as const;
 
 const ALIGN = new Set(["left", "center", "right", "justify"]);
 
@@ -110,7 +96,7 @@ function Body({ block }: { block: Record<string, Json> }) {
         </span>
       );
     case "image": {
-      const src = safeUrl(props.url, IMAGE_SCHEMES);
+      const src = safeUrl(props.url, MEDIA_SCHEMES);
       if (!src) return null;
       const caption = text(props.caption);
       return (

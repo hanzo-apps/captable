@@ -1,5 +1,6 @@
 import { generatePublicId } from "@/common/id";
 import { Audit } from "@/server/audit";
+import { assertCompanyBuckets } from "@/server/bucket";
 import type { TPrismaOrTransaction } from "@/server/db";
 import {
   withAccessControl,
@@ -70,6 +71,8 @@ export const createDocumentProcedure = withAccessControl
     } = ctx;
 
     const data = await db.$transaction(async (tx) => {
+      await assertCompanyBuckets(tx, companyId, [input.bucketId]);
+
       const data = await createDocumentHandler({
         input,
         userAgent,

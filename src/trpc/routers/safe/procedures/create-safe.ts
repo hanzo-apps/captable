@@ -5,6 +5,7 @@ import { invariant } from "@/lib/error";
 import { TAG } from "@/lib/tags";
 import { Audit } from "@/server/audit";
 import { checkMembership } from "@/server/auth";
+import { assertCompanyBuckets } from "@/server/bucket";
 import { captableFailure } from "@/server/captable-api";
 import { storeFile } from "@/server/file-uploads";
 import { withAccessControl } from "@/trpc/api/trpc";
@@ -22,6 +23,14 @@ export const createSafeProcedure = withAccessControl
     const safeTemplate = input.safeTemplate;
 
     const { orderedDelivery, recipients, ...inputRest } = input;
+
+    // A custom template is the member's own upload, checked before the SAFE
+    // lands upstream so a refusal leaves nothing behind there.
+    if (input.safeTemplate === "CUSTOM") {
+      await assertCompanyBuckets(db, ctx.membership.companyId, [
+        input.document.bucketId,
+      ]);
+    }
 
     try {
       // The SAFE lands upstream first. The bucket, template and audit below are
@@ -47,9 +56,13 @@ export const createSafeProcedure = withAccessControl
           size: pdfBuffer.byteLength,
         } as unknown as File;
 
+        const { publicId } = await db.company.findUniqueOrThrow({
+          where: { id: ctx.membership.companyId },
+          select: { publicId: true },
+        });
         uploadData = await storeFile(
           file,
-          { identifier: "templates", keyPrefix: "new-safes" },
+          { identifier: publicId, keyPrefix: "new-safes" },
           "privateBucket",
         );
       }

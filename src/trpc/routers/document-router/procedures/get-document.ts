@@ -1,4 +1,4 @@
-import { getPresignedGetUrl } from "@/server/file-uploads";
+import { companyObjectUrl } from "@/server/bucket";
 import { withAccessControl, withAuth } from "@/trpc/api/trpc";
 import { ZodGetDocumentQuerySchema } from "../schema";
 
@@ -27,6 +27,6 @@ export const getDocumentProcedure = withAccessControl
         },
       });
 
-      return getPresignedGetUrl(data.bucket.key);
+      return companyObjectUrl(db, companyId, data.bucket.key);
     },
   );
