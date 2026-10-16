@@ -4,6 +4,12 @@ import {
   parseMemberIdentifier,
   sameAddress,
 } from "@/lib/invite";
+import {
+  type Change,
+  type Role,
+  memberChangeRefusal,
+  roleWriteRefusal,
+} from "@/lib/rbac/admin";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 import { type TPrismaOrTransaction, db } from "./db";
@@ -120,4 +126,44 @@ export async function revokeExistingInviteTokens({
   await dbClient.verificationToken.deleteMany({
     where: { identifier: { endsWith: `:${memberId}` } },
   });
+}
+
+/** Refuses a caller who may not write roles (roleWriteRefusal). */
+export function authorizeRoleWrite(caller: { role: Role }) {
+  const refusal = roleWriteRefusal(caller);
+  if (refusal) throw new TRPCError({ code: "FORBIDDEN", message: refusal });
+}
+
+/**
+ * Loads a member of the company and refuses `change` when the caller may not
+ * make it (memberChangeRefusal): a role written by a non-admin, anything a
+ * non-admin does to an admin, or the company losing its last ACTIVE ADMIN.
+ */
+export async function authorizeMemberChange(
+  tx: TPrismaOrTransaction,
+  {
+    caller,
+    companyId,
+    memberId,
+    change,
+  }: {
+    caller: { role: Role };
+    companyId: string;
+    memberId: string;
+    change: Change;
+  },
+) {
+  const target = await tx.member.findFirst({
+    where: { id: memberId, companyId },
+    select: { role: true, customRoleId: true, status: true },
+  });
+  if (!target) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "member not found" });
+  }
+  const activeAdmins = await tx.member.count({
+    where: { companyId, role: "ADMIN", status: "ACTIVE" },
+  });
+  const refusal = memberChangeRefusal({ caller, target, change, activeAdmins });
+  if (refusal) throw new TRPCError({ code: "FORBIDDEN", message: refusal });
+  return target;
 }

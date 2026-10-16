@@ -1,6 +1,7 @@
 import DataRoomFileExplorer from "@/components/documents/data-room/explorer";
 import { SharePageLayout } from "@/components/share/page-layout";
 import { type JWTVerifyResult, decode } from "@/lib/jwt";
+import { recipientMayOpen } from "@/lib/share";
 import { db } from "@/server/db";
 import { RiFolder3Fill as FolderIcon } from "@remixicon/react";
 import { notFound } from "next/navigation";
@@ -29,18 +30,19 @@ const DataRoomPage = async ({
     return notFound();
   }
 
-  const recipient = await db.dataRoomRecipient.findFirstOrThrow({
+  const recipient = await db.dataRoomRecipient.findFirst({
     where: {
-      id: recipientId,
-      dataRoomId,
+      id: String(recipientId),
+      dataRoomId: String(dataRoomId),
     },
 
     select: {
-      id: true,
+      memberId: true,
+      member: { select: { status: true } },
     },
   });
 
-  if (!recipient) {
+  if (!recipient || !recipientMayOpen(recipient)) {
     return notFound();
   }
 

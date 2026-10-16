@@ -15,7 +15,7 @@ export const saveUpdateProcedure = withAccessControl
       const userName = ctx.session.user.name;
       const { userAgent, requestIp } = ctx;
       const publicId = input.publicId ?? generatePublicId();
-      const { title, content, html } = input;
+      const { title, content } = input;
 
       const action = input.publicId ? "update" : "create";
       if (!RBAC.allows(ctx.permissions, "updates", action)) {
@@ -33,7 +33,8 @@ export const saveUpdateProcedure = withAccessControl
           const update = await tx.update.update({
             where: { publicId, companyId },
             data: {
-              html,
+              // An update is read from its blocks; no stored markup is ever shown.
+              html: "",
               title,
               content,
             },
@@ -56,7 +57,8 @@ export const saveUpdateProcedure = withAccessControl
         } else {
           const update = await tx.update.create({
             data: {
-              html,
+              // An update is read from its blocks; no stored markup is ever shown.
+              html: "",
               title,
               content,
               publicId,

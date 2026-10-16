@@ -1,9 +1,6 @@
 "use client";
 
-import ShareModal, {
-  type ExtendedUpdateRecipientType,
-} from "@/components/common/share-modal";
-import { env } from "@/env";
+import ShareModal from "@/components/common/share-modal";
 import type { ShareRecipientType } from "@/schema/contacts";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
@@ -18,7 +15,6 @@ type ShareUpdateModalProps = {
 
 export const ShareUpdateModal = ({ update }: ShareUpdateModalProps) => {
   const router = useRouter();
-  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
 
   const { data: recipients, refetch: refetchRecipients } =
     api.update.getRecipients.useQuery({
@@ -56,10 +52,9 @@ export const ShareUpdateModal = ({ update }: ShareUpdateModalProps) => {
     <ShareModal
       recipientsPayload={{
         type: "update",
-        recipients: (recipients as ExtendedUpdateRecipientType[]) ?? [],
+        recipients: recipients ?? [],
       }}
       contacts={contacts || []}
-      baseLink={`${baseUrl}/updates/${update.publicId}`}
       title={"Share investor updates"}
       subtitle="Share important updates with fellow members/stakeholders"
       onShare={async ({ selectedContacts, others }) => {

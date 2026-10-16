@@ -41,6 +41,10 @@ function determineCookieName(authUrl: string): string {
 
 async function validateSessionCookie(authUrl: string, c: Context) {
   const session = await fetchSessionFromAuthUrl(authUrl, c);
+  // An ended session answers as an empty object, not an error.
+  if (!session?.user?.id) {
+    throw new Error("no session");
+  }
   const companyIdParam = c.req.param("companyId");
   const { db } = c.get("services");
 

@@ -2,6 +2,7 @@ import { sendMemberInviteEmailJob } from "@/jobs/member-inivite-email";
 import { generateMemberIdentifier, isPlaceholder } from "@/lib/invite";
 import { Audit } from "@/server/audit";
 import {
+  authorizeMemberChange,
   generateInviteToken,
   revokeExistingInviteTokens,
 } from "@/server/member";
@@ -31,6 +32,13 @@ export const reInviteProcedure = withAccessControl
               name: true,
               id: true,
             },
+          });
+
+          await authorizeMemberChange(tx, {
+            caller: membership,
+            companyId,
+            memberId: input.memberId,
+            change: {},
           });
 
           const member = await tx.member.findFirstOrThrow({

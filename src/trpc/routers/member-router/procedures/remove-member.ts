@@ -1,5 +1,6 @@
 import { Audit } from "@/server/audit";
 import type { TPrismaOrTransaction } from "@/server/db";
+import { authorizeMemberChange } from "@/server/member";
 import {
   withAccessControl,
   type withAccessControlTrpcContextType,
@@ -39,6 +40,22 @@ export async function removeMemberHandler({
   const user = session.user;
   const { memberId } = input;
   const { companyId } = membership;
+
+  await authorizeMemberChange(db, {
+    caller: membership,
+    companyId,
+    memberId,
+    change: { remove: true },
+  });
+
+  // A member's share links end with the membership: the recipient rows that
+  // name them go with it, rather than surviving as links nobody holds to account.
+  await db.dataRoomRecipient.deleteMany({
+    where: { memberId, dataRoom: { companyId } },
+  });
+  await db.updateRecipient.deleteMany({
+    where: { memberId, update: { companyId } },
+  });
 
   const member = await db.member.delete({
     where: {

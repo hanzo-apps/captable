@@ -14,7 +14,7 @@ export const cloneUpdateProcedure = withAccessControl
       const userName = ctx.session.user.name;
       const { userAgent, requestIp } = ctx;
       const publicId = generatePublicId();
-      const { title, content, html } = input;
+      const { title, content } = input;
 
       if (title.length === 0 || content.length === 0) {
         return {
@@ -25,7 +25,8 @@ export const cloneUpdateProcedure = withAccessControl
       await ctx.db.$transaction(async (tx) => {
         const update = await tx.update.create({
           data: {
-            html,
+            // An update is read from its blocks; no stored markup is ever shown.
+            html: "",
             title: `Copy of - ${title}`,
             content,
             publicId,

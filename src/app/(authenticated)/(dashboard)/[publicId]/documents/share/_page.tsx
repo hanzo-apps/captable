@@ -25,7 +25,6 @@ const DocumentsPage = async () => {
         subtitle="Please click the button below to upload a new document."
       >
         <DocumentUploadModal
-          companyPublicId={session.user.companyPublicId}
           trigger={
             <Button>
               <RiAddFill className="mr-2 h-5 w-5" />
@@ -44,7 +43,6 @@ const DocumentsPage = async () => {
         description="Share pitch decks, financials, and any other important documents."
         action={
           <DocumentUploadModal
-            companyPublicId={session.user.companyPublicId}
             trigger={
               <Button>
                 <RiAddFill className="mr-2 h-5 w-5" />

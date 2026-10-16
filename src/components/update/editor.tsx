@@ -169,7 +169,6 @@ const UpdatesEditor = ({
   const [content, setContent] = useState<Block[]>(
     (update?.content as Block[]) ?? defaultContent,
   );
-  const [html, setHtml] = useState<string>(update?.html ?? "");
   const [loading, setLoading] = useState<boolean>(false);
 
   const editor = useCreateBlockNote({
@@ -228,7 +227,6 @@ const UpdatesEditor = ({
 
     const data = {
       title,
-      html,
       content,
       publicId: update?.publicId,
     };
@@ -241,7 +239,6 @@ const UpdatesEditor = ({
 
     const data = {
       title,
-      html,
       content,
     };
 
@@ -379,10 +376,8 @@ const UpdatesEditor = ({
           className="py-5"
           editor={editor}
           theme="light"
-          onChange={async () => {
+          onChange={() => {
             setContent(editor.document);
-            const html = await editor.blocksToHTMLLossy(editor.document);
-            setHtml(html);
           }}
         />
       </Card>

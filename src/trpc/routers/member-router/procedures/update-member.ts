@@ -1,7 +1,7 @@
 import { getRoleById } from "@/lib/rbac/access-control";
 import { Audit } from "@/server/audit";
+import { authorizeMemberChange } from "@/server/member";
 import { withAccessControl } from "@/trpc/api/trpc";
-import { TRPCError } from "@trpc/server";
 import { ZodUpdateMemberMutationSchema } from "../schema";
 
 export const updateMemberProcedure = withAccessControl
@@ -21,15 +21,18 @@ export const updateMemberProcedure = withAccessControl
       const user = session.user;
 
       await db.$transaction(async (tx) => {
-        const role = await getRoleById({ tx, id: roleId });
-        // A role grants what its holder could already grant, so only an ADMIN
-        // makes another ADMIN.
-        if (role.role === "ADMIN" && membership.role !== "ADMIN") {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Only an admin can make another member an admin.",
-          });
-        }
+        // A role is touched only when the edit names one; an edit that says
+        // nothing about it keeps the member's role as it is.
+        const role =
+          roleId === undefined
+            ? undefined
+            : await getRoleById({ tx, id: roleId, companyId });
+        await authorizeMemberChange(tx, {
+          caller: membership,
+          companyId,
+          memberId,
+          change: role ? { role } : {},
+        });
 
         const member = await tx.member.update({
           where: {
@@ -39,16 +42,12 @@ export const updateMemberProcedure = withAccessControl
           },
           data: {
             ...rest,
-            ...(role && { role: role.role }),
-            customRole: {
-              ...(role.customRoleId
-                ? {
-                    connect: {
-                      id: role.customRoleId,
-                    },
-                  }
-                : { disconnect: true }),
-            },
+            ...(role && {
+              role: role.role,
+              customRole: role.customRoleId
+                ? { connect: { id: role.customRoleId } }
+                : { disconnect: true },
+            }),
             user: {
               update: {
                 name,

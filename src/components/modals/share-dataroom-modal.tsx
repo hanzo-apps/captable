@@ -1,9 +1,6 @@
 "use client";
 
-import ShareModal, {
-  type ExtendedDataRoomRecipientType,
-} from "@/components/common/share-modal";
-import { env } from "@/env";
+import ShareModal from "@/components/common/share-modal";
 import type { ShareContactType, ShareRecipientType } from "@/schema/contacts";
 import { api } from "@/trpc/react";
 import type { DataRoom } from "@prisma/client";
@@ -18,8 +15,6 @@ export const ShareDataRoomModal = ({
   dataRoom,
   contacts,
 }: ShareDataRoomModalProps) => {
-  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
-
   const { data, refetch: refetchRecipients } =
     api.dataRoom.getDataRoom.useQuery({
       dataRoomPublicId: dataRoom.publicId,
@@ -55,10 +50,9 @@ export const ShareDataRoomModal = ({
     <ShareModal
       recipientsPayload={{
         type: "dataroom",
-        recipients: (recipients as ExtendedDataRoomRecipientType[]) ?? [],
+        recipients: recipients ?? [],
       }}
       contacts={contacts}
-      baseLink={`${baseUrl}/data-rooms/${dataRoom.publicId}`}
       title={`Share data room - "${dataRoom.name}"`}
       subtitle="Share this data room with others."
       onShare={async ({ selectedContacts, others }) => {

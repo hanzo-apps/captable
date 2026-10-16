@@ -116,9 +116,7 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
       const { fileUrl } = await uploadFile(
         file,
         {
-          expiresIn: 3600,
           keyPrefix: "profile-avatars",
-          identifier: session.user.id,
         },
         "publicBucket",
       );

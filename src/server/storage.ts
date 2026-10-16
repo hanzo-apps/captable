@@ -6,7 +6,9 @@
 // member of it. The signing itself is ./file-uploads.ts, which checks nothing
 // and is reachable from server code alone.
 
+import { uploadRefusal } from "@/lib/upload-policy";
 import { checkMembership, getServerAuthSession } from "@/server/auth";
+import { companyStands } from "@/server/company";
 import { db } from "@/server/db";
 import {
   getPresignedGetUrl,
@@ -34,37 +36,51 @@ const activeMembership = async (
   }
 };
 
-/**
- * A presigned PUT, for a file filed under the caller's own account (a profile
- * photo, the logo of a company being founded) or under the company they are an
- * active member of. The object key is minted here, never taken from the caller.
- */
-export async function presignUpload(options: getPresignedUrlOptions) {
-  const session = await signedIn();
-  const { identifier, keyPrefix, bucketMode } = options;
+/** An upload a browser may ask to be signed. Where it lands is decided here. */
+export type UploadRequest = Pick<
+  getPresignedUrlOptions,
+  "contentType" | "fileName" | "keyPrefix" | "bucketMode"
+>;
 
-  // Only pictures meant to be shown anywhere go to the public bucket.
-  if (
-    bucketMode === "publicBucket" &&
-    keyPrefix !== "company-logos" &&
-    keyPrefix !== "profile-avatars"
-  ) {
+/**
+ * A presigned PUT for an ACTIVE member: a profile photo under their account,
+ * anything else under their company's public id, and a public object only as
+ * an allowed picture (uploadRefusal). The one upload without a membership is
+ * the founder's logo, made before the company it belongs to exists. The key's
+ * prefix is minted here, never taken from the caller.
+ */
+export async function presignUpload(request: UploadRequest) {
+  const session = await signedIn();
+  const { keyPrefix, bucketMode, contentType, fileName } = request;
+
+  const refusal = uploadRefusal({ keyPrefix, bucketMode, contentType });
+  if (refusal) throw new Error(refusal);
+
+  const membership = await activeMembership(session);
+  let identifier: string;
+  if (membership) {
+    identifier =
+      keyPrefix === "profile-avatars"
+        ? session.user.id
+        : (
+            await db.company.findUniqueOrThrow({
+              where: { id: membership.companyId },
+              select: { publicId: true },
+            })
+          ).publicId;
+  } else if (keyPrefix === "company-logos" && !(await companyStands())) {
+    identifier = session.user.id;
+  } else {
     throw refused();
   }
 
-  if (identifier !== session.user.id) {
-    const membership = await activeMembership(session);
-    if (
-      !membership ||
-      identifier !== session.user.companyPublicId ||
-      !session.user.companyPublicId
-    ) {
-      throw refused();
-    }
-  }
-
-  // The URL lives for the store's default ten minutes, whatever was asked.
-  return getPresignedPutUrl({ ...options, expiresIn: undefined });
+  return getPresignedPutUrl({
+    contentType,
+    fileName,
+    keyPrefix,
+    bucketMode,
+    identifier,
+  });
 }
 
 /**

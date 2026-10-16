@@ -8,35 +8,25 @@ import MultipleSelector, { type Option } from "@/components/ui/multi-selector";
 
 import type { ShareContactType } from "@/schema/contacts";
 import type { DataRoomRecipient, UpdateRecipient } from "@prisma/client";
-import {
-  RiCheckLine as CheckIcon,
-  RiDeleteBin2Line as DeleteIcon,
-  RiLink as LinkIcon,
-} from "@remixicon/react";
+import { RiDeleteBin2Line as DeleteIcon } from "@remixicon/react";
 import { Fragment, useState } from "react";
-import { useCopyToClipboard } from "usehooks-ts";
 import { popModal } from "../modals";
 
-export interface ExtendedDataRoomRecipientType extends DataRoomRecipient {
-  token: string | object;
-}
-export interface ExtendedUpdateRecipientType extends UpdateRecipient {
-  token: string | object;
-}
+// Recipients are listed without their links: a link reaches its recipient by
+// mail alone, so sharing again is how a lost one is replaced.
 type Recipients =
   | {
       type: "dataroom";
-      recipients: ExtendedDataRoomRecipientType[] | [];
+      recipients: DataRoomRecipient[] | [];
     }
   | {
       type: "update";
-      recipients: ExtendedUpdateRecipientType[] | [];
+      recipients: UpdateRecipient[] | [];
     };
 
 export type Props = {
   title: string;
   subtitle: string;
-  baseLink: string;
   contacts: ShareContactType[] | [];
   recipientsPayload: Recipients;
   onShare: (data: { others: object[]; selectedContacts: object[] }) => void;
@@ -46,31 +36,14 @@ export type Props = {
 const Share = ({
   title,
   subtitle,
-  baseLink,
   contacts,
   recipientsPayload,
   onShare,
   removeAccess,
 }: Props) => {
   const [loading, _setLoading] = useState<boolean>(false);
-  const [_copiedText, copy] = useCopyToClipboard();
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Option[]>([]);
   const { recipients } = recipientsPayload;
-
-  const copyToClipboard = (id: string, text: string) => {
-    copy(text)
-      .then(() => {
-        setCopiedId(id);
-
-        setTimeout(() => {
-          setCopiedId(null);
-        }, 1000);
-      })
-      .catch(() => {
-        setCopiedId(null);
-      });
-  };
 
   return (
     <Modal size="lg" title={title} subtitle={subtitle} scrollable={true}>
@@ -147,26 +120,6 @@ const Share = ({
                       >
                         <DeleteIcon className="h-4 w-4" />
                         Remove
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={"secondary"}
-                        className="flex text-sm font-medium text-primary/70 hover:text-primary/90"
-                        onClick={() =>
-                          copyToClipboard(
-                            recipient.id,
-                            `${baseLink}?token=${recipient.token as string}`,
-                          )
-                        }
-                      >
-                        <Fragment>
-                          {copiedId === recipient.id ? (
-                            <CheckIcon className="h-4 w-4 text-green-500 transition" />
-                          ) : (
-                            <LinkIcon className="h-4 w-4 transition" />
-                          )}
-                          Copy link
-                        </Fragment>
                       </Button>
                     </div>
                   </div>

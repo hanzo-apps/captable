@@ -66,10 +66,8 @@ const Pages: CommandOption[] = [
     id: "documents",
     title: "Upload document",
     icon: RiUploadCloud2Fill,
-    onClick: (companyPublicId: string) => {
-      pushModal("DocumentUploadModal", {
-        companyPublicId,
-      });
+    onClick: () => {
+      pushModal("DocumentUploadModal");
     },
   },
   {

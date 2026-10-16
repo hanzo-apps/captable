@@ -10,6 +10,7 @@ import type { TPrismaOrTransaction } from "@/server/db";
 import { type EsignGetTemplateType, getEsignTemplate } from "@/server/esign";
 import { EncodeEmailToken } from "@/trpc/routers/template-field-router/procedures/add-fields";
 import type { EsignRecipientStatus } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 export class EsignService {
   getTemplate(templateId: string, tx: TPrismaOrTransaction) {
@@ -32,15 +33,29 @@ export class EsignService {
     });
   }
 
-  updateRecipientStatus(
+  /**
+   * Moves a recipient to `status` from PENDING or SENT, and only from there: of
+   * two signings racing for one recipient, the second finds it already moved,
+   * changes nothing, and is refused, so a document is signed and completed once.
+   */
+  async updateRecipientStatus(
     recipientId: string,
     status: EsignRecipientStatus,
     tx: TPrismaOrTransaction,
   ) {
-    return tx.esignRecipient.update({
-      where: { id: recipientId },
+    const from = (["PENDING", "SENT"] as EsignRecipientStatus[]).filter(
+      (s) => s !== status,
+    );
+    const { count } = await tx.esignRecipient.updateMany({
+      where: { id: recipientId, status: { in: from } },
       data: { status },
     });
+    if (count !== 1) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "This document has already been signed.",
+      });
+    }
   }
 
   async handleOrderedDelivery(

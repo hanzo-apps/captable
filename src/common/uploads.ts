@@ -1,13 +1,12 @@
-import type { getPresignedUrlOptions } from "@/server/file-uploads";
-import { presignUpload } from "@/server/storage";
+import { type UploadRequest, presignUpload } from "@/server/storage";
 import { putFile } from "./put-file";
 
 export type { TUploadFile } from "./put-file";
 
 /**
  * Uploads a file from the browser. The URL it PUTs to is minted by the
- * `presignUpload` action, which signs only for the caller's own account or the
- * company they are an active member of.
+ * `presignUpload` action, which decides where it lands: the caller's account
+ * or the company they are an active member of.
  *
  * usage
  * ```js
@@ -23,17 +22,14 @@ export type { TUploadFile } from "./put-file";
  */
 export const uploadFile = async (
   file: File,
-  options: Pick<
-    getPresignedUrlOptions,
-    "expiresIn" | "keyPrefix" | "identifier"
-  >,
-  bucketMode: "publicBucket" | "privateBucket" = "privateBucket",
+  { keyPrefix }: Pick<UploadRequest, "keyPrefix">,
+  bucketMode: UploadRequest["bucketMode"] = "privateBucket",
 ) => {
   const presigned = await presignUpload({
     contentType: file.type,
     fileName: file.name,
     bucketMode,
-    ...options,
+    keyPrefix,
   });
   return putFile(file, presigned, bucketMode);
 };

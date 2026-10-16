@@ -1,5 +1,6 @@
 import { getRoleById } from "@/lib/rbac/access-control";
 import { Audit } from "@/server/audit";
+import { authorizeRoleWrite } from "@/server/member";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodUpdateRoleMutationSchema } from "../schema";
 import { extractPermission } from "./create-role";
@@ -16,16 +17,21 @@ export const updateRolesProcedure = withAccessControl
       input,
       ctx: { db, membership, userAgent, requestIp, session },
     }) => {
+      authorizeRoleWrite(membership);
       const permissions = extractPermission(input.permissions);
       const { user } = session;
       await db.$transaction(async (tx) => {
-        const id = await getRoleById({ id: input.roleId, tx });
+        const id = await getRoleById({
+          id: input.roleId,
+          tx,
+          companyId: membership.companyId,
+        });
 
         if (!id.customRoleId) {
           throw new Error("role id not found");
         }
 
-        const role = await db.customRole.update({
+        const role = await tx.customRole.update({
           where: {
             companyId: membership.companyId,
             id: id.customRoleId,
@@ -46,7 +52,7 @@ export const updateRolesProcedure = withAccessControl
               requestIp,
             },
             target: [{ type: "role", id: role.id }],
-            summary: `${user.name} deleted the role ${role.name}`,
+            summary: `${user.name} updated the role ${role.name}`,
           },
           tx,
         );

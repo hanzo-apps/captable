@@ -37,10 +37,7 @@ const DocumentsPage = async () => {
         subtitle="Please click the button below to upload a new document."
       >
         {canUpload && (
-          <DocumentUploadButton
-            companyPublicId={session.user.companyPublicId}
-            buttonDisplayName="Upload a document"
-          />
+          <DocumentUploadButton buttonDisplayName="Upload a document" />
         )}
       </EmptyState>
     );
@@ -53,10 +50,7 @@ const DocumentsPage = async () => {
         description="Upload documents to your company's document library."
         action={
           canUpload ? (
-            <DocumentUploadButton
-              companyPublicId={session.user.companyPublicId}
-              buttonDisplayName="Document"
-            />
+            <DocumentUploadButton buttonDisplayName="Document" />
           ) : null
         }
       />

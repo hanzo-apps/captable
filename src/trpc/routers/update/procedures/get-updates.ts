@@ -1,4 +1,3 @@
-import { encodeShare } from "@/lib/jwt";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { z } from "zod";
 
@@ -46,16 +45,7 @@ export const getRecipientsProcedure = withAccessControl
       },
     });
 
-    const recipients = await Promise.all(
-      data.map(async (recipient) => ({
-        ...recipient,
-        token: await encodeShare({
-          updateId,
-          companyId,
-          recipientId: recipient.id,
-        }),
-      })),
-    );
-
-    return recipients;
+    // Who it is shared with, never their links: a link is minted only where
+    // it is mailed (share), so reading an update hands out no access.
+    return data;
   });

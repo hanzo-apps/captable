@@ -1,12 +1,13 @@
-import "@blocknote/react/style.css";
-import "@/styles/editor.css";
+import { Blocks } from "./blocks";
 
-type UpdatesEditorProps = {
-  html: string;
+type UpdateRendererProps = {
+  /** The update's stored blocks (Update.content). */
+  content: unknown;
 };
 
-const UpdateRenderer = ({ html }: UpdatesEditorProps) => {
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+/** An investor update as its readers see it. */
+const UpdateRenderer = ({ content }: UpdateRendererProps) => {
+  return <Blocks blocks={content} />;
 };
 
 export default UpdateRenderer;

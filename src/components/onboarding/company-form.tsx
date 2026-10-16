@@ -119,9 +119,7 @@ export const CompanyForm = ({ type, data }: CompanyFormProps) => {
       const { fileUrl } = await uploadFile(
         file,
         {
-          expiresIn: 3600,
           keyPrefix: "company-logos",
-          identifier: user.user.id,
         },
         "publicBucket",
       );

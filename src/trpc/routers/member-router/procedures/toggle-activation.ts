@@ -1,4 +1,5 @@
 import { Audit } from "@/server/audit";
+import { authorizeMemberChange } from "@/server/member";
 import { withAccessControl } from "@/trpc/api/trpc";
 import { ZodToggleActivationMutationSchema } from "../schema";
 
@@ -15,6 +16,13 @@ export const toggleActivation = withAccessControl
 
       await db.$transaction(async (tx) => {
         const { companyId } = membership;
+
+        await authorizeMemberChange(tx, {
+          caller: membership,
+          companyId,
+          memberId,
+          change: { status },
+        });
 
         const member = await tx.member.update({
           where: {

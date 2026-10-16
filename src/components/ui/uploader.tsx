@@ -27,21 +27,18 @@ type UploadProps =
   | {
       shouldUpload?: true;
       onSuccess?: (data: UploadReturn) => void | Promise<void>;
-      identifier: string;
       keyPrefix: TypeKeyPrefixes;
       tags: TagType[];
     }
   | {
       shouldUpload: false;
       onSuccess?: (data: FileWithPath[]) => void | Promise<void>;
-      identifier?: never;
       keyPrefix?: never;
       tags?: TagType[];
     };
 
 type Props = {
   header?: React.ReactNode;
-  // should be companyPublicId or memberId or userId
 
   multiple?: boolean;
 } & DocumentUploadDropzone &
@@ -49,7 +46,6 @@ type Props = {
 
 export function Uploader({
   header,
-  identifier,
   keyPrefix,
   onSuccess,
   multiple = false,
@@ -78,7 +74,6 @@ export function Uploader({
 
         for (const file of acceptedFiles) {
           const { key, mimeType, name, size } = await uploadFile(file, {
-            identifier: identifier as string,
             keyPrefix: keyPrefix as TypeKeyPrefixes,
           });
 

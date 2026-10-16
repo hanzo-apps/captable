@@ -1,6 +1,8 @@
+import { companyOwnsKey } from "@/lib/upload-policy";
 import { Audit } from "@/server/audit";
 import type { TPrismaOrTransaction } from "@/server/db";
 import { withAccessControl } from "@/trpc/api/trpc";
+import { TRPCError } from "@trpc/server";
 import {
   type TypeZodCreateBucketMutationSchema,
   ZodCreateBucketMutationSchema,
@@ -48,14 +50,34 @@ export const createBucketHandler = async ({
 export const createBucketProcedure = withAccessControl
   .meta({ policies: { documents: { allow: ["create"] } } })
   .input(ZodCreateBucketMutationSchema)
-  .mutation(async ({ ctx: { db, userAgent, requestIp, session }, input }) => {
-    const { name, companyId, id } = session.user;
-
-    return await createBucketHandler({
+  .mutation(
+    async ({
+      ctx: { db, userAgent, requestIp, session, membership },
       input,
-      db,
-      userAgent,
-      requestIp,
-      user: { name: name || "", companyId, id },
-    });
-  });
+    }) => {
+      const { name, id } = session.user;
+      const { companyId } = membership;
+
+      // A bucket records an object this company's upload put in the store: the
+      // store signs every such upload under the company's public id, so a key
+      // under any other prefix is not this company's to record.
+      const { publicId } = await db.company.findUniqueOrThrow({
+        where: { id: companyId },
+        select: { publicId: true },
+      });
+      if (!companyOwnsKey(input.key, publicId)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This file was not uploaded for this company.",
+        });
+      }
+
+      return await createBucketHandler({
+        input,
+        db,
+        userAgent,
+        requestIp,
+        user: { name: name || "", companyId, id },
+      });
+    },
+  );

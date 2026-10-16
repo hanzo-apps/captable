@@ -1,7 +1,6 @@
 "use client";
 
 import EmptyState from "@/components/common/empty-state";
-import type { ExtendedDataRoomRecipientType } from "@/components/common/share-modal";
 import DataRoomFileExplorer from "@/components/documents/data-room/explorer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -94,7 +93,6 @@ const DataRoomFiles = ({
 
               <DataRoomUploader
                 dataRoom={dataRoom}
-                companyPublicId={companyPublicId}
                 trigger={
                   <Button>
                     <RiAddFill className="mr-2 h-5 w-5" />
@@ -123,7 +121,6 @@ const DataRoomFiles = ({
             >
               <DataRoomUploader
                 dataRoom={dataRoom}
-                companyPublicId={companyPublicId}
                 trigger={
                   <Button>
                     <RiAddFill className="mr-2 h-5 w-5" />

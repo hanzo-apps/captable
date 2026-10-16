@@ -6,13 +6,7 @@ import { TAG } from "@/lib/tags";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 
-type DocumentUploadModalProps = {
-  companyPublicId: string;
-};
-
-export const DocumentUploadModal = ({
-  companyPublicId,
-}: DocumentUploadModalProps) => {
+export const DocumentUploadModal = () => {
   const router = useRouter();
 
   const { mutateAsync } = api.document.create.useMutation();
@@ -24,7 +18,6 @@ export const DocumentUploadModal = ({
     >
       <Uploader
         shouldUpload={true}
-        identifier={companyPublicId}
         keyPrefix="generic-documents"
         tags={[TAG.GENERIC]}
         onSuccess={async (uploadedData: UploadReturn) => {

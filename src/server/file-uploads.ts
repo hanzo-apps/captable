@@ -75,21 +75,32 @@ export const getPresignedPutUrl = async ({
     12,
   )}${ext}`;
 
+  // A public object is served to anyone, so the type and disposition it is
+  // served with are signed into its PUT: an upload carrying any others is
+  // refused by the store. A private object is only ever read through a signed
+  // GET, and keeps the octet-stream type its bytes have always been sent with.
+  const isPublic = bucketMode === "publicBucket";
+  const headers: Record<string, string> = isPublic
+    ? { "Content-Type": contentType, "Content-Disposition": "inline" }
+    : { "Content-Type": "application/octet-stream" };
+
   const putObjectCommand = new PutObjectCommand({
-    Bucket: bucketMode === "privateBucket" ? PrivateBucket : PublicBucket,
+    Bucket: isPublic ? PublicBucket : PrivateBucket,
     Key,
     ContentType: contentType,
-    ACL: bucketMode === "privateBucket" ? "private" : "public-read",
+    ...(isPublic && { ContentDisposition: "inline" }),
+    ACL: isPublic ? "public-read" : "private",
   });
 
   const url: string = await getSignedUrl(S3, putObjectCommand, {
     expiresIn: expiresIn ?? TEN_MINUTES_IN_SECONDS,
+    ...(isPublic && { signableHeaders: new Set(["content-type"]) }),
   });
 
   const bucketUrl = new URL(url);
   bucketUrl.search = "";
 
-  return { url, key: Key, bucketUrl: bucketUrl.toString() };
+  return { url, key: Key, bucketUrl: bucketUrl.toString(), headers };
 };
 
 export const getPresignedGetUrl = async (

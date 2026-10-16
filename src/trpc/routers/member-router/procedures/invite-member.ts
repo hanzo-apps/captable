@@ -1,6 +1,7 @@
 import { sendMemberInviteEmailJob } from "@/jobs/member-inivite-email";
 import { generateMemberIdentifier } from "@/lib/invite";
 import { getRoleById } from "@/lib/rbac/access-control";
+import { memberChangeRefusal } from "@/lib/rbac/admin";
 import { Audit } from "@/server/audit";
 import {
   generateInviteToken,
@@ -71,14 +72,22 @@ export const inviteMemberProcedure = withAccessControl
           });
         }
 
-        const role = await getRoleById({ id: roleId, tx });
-        // A role grants what its holder could already grant, so only an ADMIN
-        // makes another ADMIN.
-        if (role.role === "ADMIN" && membership.role !== "ADMIN") {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Only an admin can make another member an admin.",
-          });
+        const role = await getRoleById({ id: roleId, tx, companyId });
+        // Inviting with a role writes that role; re-inviting a pending seat
+        // changes it, so it is that seat's change to make.
+        const refusal = memberChangeRefusal({
+          caller: membership,
+          target: prevMember ?? {
+            role: null,
+            customRoleId: null,
+            status: "PENDING",
+          },
+          change: { role },
+          // A pending seat is never the company's last admin.
+          activeAdmins: 0,
+        });
+        if (refusal) {
+          throw new TRPCError({ code: "FORBIDDEN", message: refusal });
         }
 
         const seatHolder =

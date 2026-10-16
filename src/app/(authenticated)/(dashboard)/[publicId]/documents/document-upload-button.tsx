@@ -6,20 +6,16 @@ import { RiAddFill } from "@remixicon/react";
 import React from "react";
 
 type DocumentUploadButtonProps = {
-  companyPublicId: string;
   buttonDisplayName: string;
 };
 
 export const DocumentUploadButton = ({
-  companyPublicId,
   buttonDisplayName,
 }: DocumentUploadButtonProps) => {
   return (
     <Button
       onClick={() => {
-        pushModal("DocumentUploadModal", {
-          companyPublicId,
-        });
+        pushModal("DocumentUploadModal");
       }}
     >
       <RiAddFill className="mr-2 h-5 w-5" />

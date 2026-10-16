@@ -10,6 +10,7 @@ import {
 } from "next-auth";
 
 import { env } from "@/env";
+import { SESSION_MAX_AGE, iamTokenExpiry, sessionLive } from "@/lib/session";
 import type { MemberStatusEnum } from "@/prisma/enums";
 import { type TPrismaOrTransaction, db } from "@/server/db";
 import { getToken } from "next-auth/jwt";
@@ -156,9 +157,16 @@ export const authOptions: NextAuthOptions = {
       // reachable at all.
       if (account?.access_token) {
         token.hanzoToken = account.access_token;
-        token.hanzoTokenExpires = account.expires_at
-          ? account.expires_at * 1000
-          : undefined;
+        token.hanzoTokenExpires = iamTokenExpiry(account);
+      }
+
+      // Every read of a session runs through here — the tRPC context, server
+      // pages, the REST API's session cookie and the server actions all call
+      // getServerSession — so this one check ends the session everywhere at
+      // once. next-auth answers a throw by clearing the cookie and reporting no
+      // session.
+      if (!sessionLive(token)) {
+        throw new Error("the Hanzo sign-in behind this session has expired");
       }
 
       // The org claim rides the verified id_token. It is not a User column, and
@@ -222,6 +230,7 @@ export const authOptions: NextAuthOptions = {
   secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
+    maxAge: SESSION_MAX_AGE,
   },
   providers: [HanzoIAMProvider()],
 
@@ -262,9 +271,7 @@ export async function hanzoAccessToken(headers: Headers): Promise<string> {
     secret: env.NEXTAUTH_SECRET,
   });
 
-  if (!token?.hanzoToken) return "";
-  if (token.hanzoTokenExpires && token.hanzoTokenExpires <= Date.now())
-    return "";
+  if (!token?.hanzoToken || !sessionLive(token)) return "";
   return token.hanzoToken;
 }
 

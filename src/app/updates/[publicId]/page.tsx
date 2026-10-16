@@ -3,9 +3,9 @@ import { SharePageLayout } from "@/components/share/page-layout";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import UpdateRenderer from "@/components/update/renderer";
 import { type JWTVerifyResult, decode } from "@/lib/jwt";
+import { recipientMayOpen } from "@/lib/share";
 import { UpdateStatusEnum } from "@/prisma/enums";
 import { db } from "@/server/db";
-import { render } from "@react-email/components";
 import { RiLock2Line } from "@remixicon/react";
 import { notFound } from "next/navigation";
 import { Fragment } from "react";
@@ -73,10 +73,10 @@ const PublicUpdatePage = async ({
   // which ends the link at once rather than when it expires.
   const recipient = await db.updateRecipient.findFirst({
     where: { id: String(payload.recipientId), updateId: update.id },
-    select: { id: true },
+    select: { memberId: true, member: { select: { status: true } } },
   });
 
-  if (!recipient) {
+  if (!recipient || !recipientMayOpen(recipient)) {
     return notFound();
   }
 
@@ -96,20 +96,8 @@ const PublicUpdatePage = async ({
     );
   }
 
-  const recipients = await db.updateRecipient.findFirst({
-    where: {
-      id: payload.recipientId,
-      updateId: update.id,
-    },
-  });
-
-  if (!recipients) {
-    return notFound();
-  }
-
   const company = update?.company;
   const author = update?.author;
-  const html = await render(<UpdateRenderer html={update.html} />);
 
   return (
     <SharePageLayout
@@ -142,11 +130,9 @@ const PublicUpdatePage = async ({
         </div>
 
         <div className="mt-5">
-          <article
-            className="prose"
-            //biome-ignore lint/security/noDangerouslySetInnerHtml: allow dangerouslySetInnerHtml
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
+          <article className="prose">
+            <UpdateRenderer content={update.content} />
+          </article>
         </div>
       </Fragment>
     </SharePageLayout>

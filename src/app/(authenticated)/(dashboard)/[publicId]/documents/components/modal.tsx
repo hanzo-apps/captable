@@ -9,13 +9,9 @@ import { useState } from "react";
 
 type DocumentUploadModalProps = {
   trigger: React.ReactNode;
-  companyPublicId: string;
 };
 
-const DocumentUploadModal = ({
-  trigger,
-  companyPublicId,
-}: DocumentUploadModalProps) => {
+const DocumentUploadModal = ({ trigger }: DocumentUploadModalProps) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -35,7 +31,6 @@ const DocumentUploadModal = ({
     >
       <Uploader
         shouldUpload={true}
-        identifier={companyPublicId}
         keyPrefix="generic-documents"
         tags={[TAG.GENERIC]}
         onSuccess={async (uploadedData: UploadReturn) => {

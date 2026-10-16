@@ -6,7 +6,7 @@ import { RBAC } from "@/lib/rbac";
 import { ShareRecipientSchema } from "@/schema/contacts";
 import { Audit } from "@/server/audit";
 import { createTRPCRouter, withAccessControl } from "@/trpc/api/trpc";
-import type { DataRoom } from "@prisma/client";
+import type { DataRoom, DataRoomRecipient } from "@prisma/client";
 import { z } from "zod";
 import { DataRoomSchema } from "./schema";
 
@@ -32,7 +32,7 @@ export const dataRoomRouter = createTRPCRouter({
       } as {
         dataRoom: object;
         documents: object[];
-        recipients: object[];
+        recipients: DataRoomRecipient[];
         company: object;
       };
 
@@ -84,17 +84,10 @@ export const dataRoomRouter = createTRPCRouter({
           }));
         }
 
+        // Who it is shared with, never their links: a link is minted only
+        // where it is mailed (share), so reading a room hands out no access.
         if (include.recipients) {
-          response.recipients = await Promise.all(
-            dataRoom.recipients.map(async (recipient) => ({
-              ...recipient,
-              token: await encodeShare({
-                companyId,
-                dataRoomId: dataRoom.id,
-                recipientId: recipient.id,
-              }),
-            })),
-          );
+          response.recipients = dataRoom.recipients;
         }
 
         return { dataRoom };
